@@ -13,6 +13,7 @@ import IssueManagement from "./screens/IssueManagement/IssueManagement";
 import Reports from "./screens/Reports/Reports";
 import Analytics from "./screens/Analytics/Analytics";
 import NotificationPanel from "./screens/NotificationPanel/NotificationPanel";
+import ReportDetail from "./screens/ReportDetail.js/ReportDetail";
 
 const Stack = createNativeStackNavigator();
 
@@ -70,6 +71,7 @@ const App = () => {
             component={NotificationPanel}
             options={{ title: "Notification Panel" }}
           />
+          <Stack.Screen name="ReportDetail" component={ReportDetail}   options={{ title: "Report Details" }} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
