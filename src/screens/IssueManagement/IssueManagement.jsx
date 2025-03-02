@@ -1,13 +1,40 @@
 // screens/IssueManagement/IssueManagement.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import styles from "./styles";
 
 const IssueManagement = ({ navigation }) => {
+  const [data, setData] = useState({ noStreetlight: 0 });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://streetlightfix-backend-1.onrender.com/admin/report",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
   const [issues, setIssues] = useState([
     {
-      id: "1",
-      issue: "Broken streetlight",
+      id: data.report_id,
+      issue: data.problem_type,
       description: "The streetlight at 123 Main St is completely out.",
       location: "123 Main St",
       status: "Open",

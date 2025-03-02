@@ -2,12 +2,41 @@
 import React from "react";
 import { View, Image, Text, TouchableOpacity } from "react-native";
 import styles from "./styles";
+import { useState, useEffect } from "react";
 
 const Dashboard = ({ navigation }) => {
+  const [data, setData] = useState({ noStreetlight: 0 });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://streetlightfix-backend-1.onrender.com/admin/home",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        setData(result);
+        console.log(result);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
   const stats = [
     { label: "Open Issues", value: "15" },
     { label: "Completed Tasks", value: "57" },
-    { label: "Total Lights", value: "2000" },
+    { label: "Total Lights", value: data.noStreetlight },
     { label: "Unassigned Tasks", value: "7" },
   ];
 
