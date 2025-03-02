@@ -1,5 +1,5 @@
 // screens/ReportDetail/ReportDetail.js
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   FlatList,
   ScrollView,
   Modal,
+  SectionList,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import styles from "./styles";
@@ -48,79 +49,106 @@ const ReportDetail = ({ route }) => {
     );
   };
 
-  return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
-      <Text style={styles.title}>{report.issue}</Text>
-      <Text style={styles.description}>{report.description}</Text>
+  // Prepare data for SectionList
+  const sections = [
+    {
+      title: "ReportInfo",
+      data: [{ id: "reportInfo" }],
+      renderItem: () => (
+        <>
+          <Text style={styles.title}>{report.issue}</Text>
+          <Text style={styles.description}>{report.description}</Text>
 
-      {/* Placeholder for image */}
-      <View
-        style={{
-          width: "100%",
-          height: 200,
-          backgroundColor: "#E0E0E0",
-          borderRadius: 10,
-          marginBottom: 20,
-        }}
-      />
+          {/* Placeholder for image */}
+          <View
+            style={{
+              width: "100%",
+              height: 200,
+              backgroundColor: "#E0E0E0",
+              borderRadius: 10,
+              marginBottom: 20,
+            }}
+          />
 
-      <View style={styles.updateContainer}>
-        <TextInput
-          style={styles.input}
-          value={statusUpdate}
-          onChangeText={setStatusUpdate}
-          placeholder="Send an update to the user..."
-          multiline
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={sendUpdate}>
-          <FontAwesome name="send" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
-
-      <Text style={styles.sectionTitle}>Updates</Text>
-      <FlatList
-        data={updates}
-        renderItem={({ item }) => (
+          <View style={styles.updateContainer}>
+            <TextInput
+              style={styles.input}
+              value={statusUpdate}
+              onChangeText={setStatusUpdate}
+              placeholder="Send an update to the user..."
+              multiline
+            />
+            <TouchableOpacity style={styles.sendButton} onPress={sendUpdate}>
+              <FontAwesome name="send" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+        </>
+      ),
+    },
+    {
+      title: "Updates",
+      data: updates.length > 0 ? updates : [{ id: "empty", isEmpty: true }],
+      renderItem: ({ item }) => {
+        if (item.isEmpty) {
+          return (
+            <Text style={styles.emptyListText}>
+              No updates sent to the user yet.
+            </Text>
+          );
+        }
+        return (
           <View style={styles.updateItem}>
             <Text style={styles.updateText}>{item.text}</Text>
             <Text style={styles.updateTimestamp}>
               {new Date(item.timestamp).toLocaleString()}
             </Text>
           </View>
-        )}
-        keyExtractor={(item) => item.id}
-        style={styles.updatesList}
-        nestedScrollEnabled
-        ListEmptyComponent={
-          <Text style={styles.emptyListText}>
-            No updates sent to the user yet.
-          </Text>
-        }
-      />
+        );
+      },
+    },
+    {
+      title: "Linesmen",
+      data: [{ id: "linesmen" }],
+      renderItem: () => (
+        <>
+          <TouchableOpacity
+            style={styles.selectLinesmenButton}
+            onPress={() => setModalVisible(true)}
+          >
+            <Text style={styles.selectLinesmenButtonText}>Select Linesmen</Text>
+            <FontAwesome name="user-plus" size={20} color="#000000" />
+          </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>Assign Linesmen</Text>
-      <TouchableOpacity
-        style={styles.selectLinesmenButton}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.selectLinesmenButtonText}>Select Linesmen</Text>
-        <FontAwesome name="user-plus" size={20} color="#000000" />
-      </TouchableOpacity>
-
-      {/* Render selected linesmen as pill-shaped items */}
-      <View style={styles.selectedLinesmenContainer}>
-        {selectedLinesmen.map((item) => (
-          <View key={item.value} style={styles.selectedLinesman}>
-            <Text style={styles.selectedLinesmanText}>{item.label}</Text>
-            <TouchableOpacity onPress={() => toggleLinesman(item)}>
-              <FontAwesome name="times" size={18} color="#000000" />
-            </TouchableOpacity>
+          {/* Render selected linesmen as pill-shaped items */}
+          <View style={styles.selectedLinesmenContainer}>
+            {selectedLinesmen.map((item) => (
+              <View key={item.value} style={styles.selectedLinesman}>
+                <Text style={styles.selectedLinesmanText}>{item.label}</Text>
+                <TouchableOpacity onPress={() => toggleLinesman(item)}>
+                  <FontAwesome name="times" size={18} color="#000000" />
+                </TouchableOpacity>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <View style={styles.container}>
+      <SectionList
+        sections={sections}
+        keyExtractor={(item) => item.id}
+        renderSectionHeader={({ section }) => {
+          if (section.title === "ReportInfo") {
+            return null;
+          }
+          return <Text style={styles.sectionTitle}>{section.title}</Text>;
+        }}
+        stickySectionHeadersEnabled={false}
+        contentContainerStyle={styles.contentContainer}
+      />
 
       {/* Linesmen Selection Modal */}
       <Modal
@@ -169,7 +197,7 @@ const ReportDetail = ({ route }) => {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 };
 

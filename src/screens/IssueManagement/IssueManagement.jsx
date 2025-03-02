@@ -39,7 +39,7 @@ const IssueManagement = ({ navigation }) => {
       location: "123 Main St",
       status: "Open",
       imageUrl: "https://example.com/broken-streetlight.jpg",
-      updates: [``],
+      updates: [],
       assignedLinesmen: [],
     },
     // ... add more sample issues
