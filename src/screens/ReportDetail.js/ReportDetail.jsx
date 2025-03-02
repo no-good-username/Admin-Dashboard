@@ -1,5 +1,5 @@
 // screens/ReportDetail/ReportDetail.js
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,30 @@ import { FontAwesome } from "@expo/vector-icons";
 import styles from "./styles";
 
 const ReportDetail = ({ route }) => {
+  
   const { report } = route.params;
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const id = report.id;
+  console.log("id is ",id);
+  useEffect(() => {
+      async function fetchData() {
+        try {
+          const response = await fetch("https://streetlightfix-backend-1.onrender.com/admin//singlereport/"+id,)
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const result = await response.json();
+          setData(result);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      }
+      fetchData();
+    }, []);
   const [statusUpdate, setStatusUpdate] = useState("");
   const [updates, setUpdates] = useState(report.updates || []);
   const [selectedLinesmen, setSelectedLinesmen] = useState(
