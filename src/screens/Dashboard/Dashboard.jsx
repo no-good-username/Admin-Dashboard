@@ -1,14 +1,48 @@
 // screens/Dashboard/Dashboard.js
-import React from "react";
+import React, { useEffect,useState } from "react";
 import { View, Image, Text, TouchableOpacity } from "react-native";
 import styles from "./styles";
 
 const Dashboard = ({ navigation }) => {
+  
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch("https://streetlightfix-backend-1.onrender.com/admin/home", {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include' // Include cookies in the request if needed
+        });
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+  
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+  
+    fetchData();
+  }, []);
+  
+
+  console.log("data ",data);
   const stats = [
-    { label: "Open Issues", value: "15" },
-    { label: "Completed Tasks", value: "57" },
-    { label: "Total Lights", value: "2000" },
-    { label: "Unassigned Tasks", value: "7" },
+    { label: "Open Issues", value: data?.OpenIssues || "N/A" },
+    { label: "Completed Tasks", value: data?.countReport || "N/A" },
+    { label: "Total Lights", value: data?.noStreetlight || "N/A"  },
+    { label: "Unassigned Tasks", value: data?.UnassignTask || "N/A" },  
   ];
 
   const quickAccess = [
