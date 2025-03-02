@@ -1,10 +1,10 @@
-// screens/IssueManagement/IssueManagement.js
 import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import styles from "./styles";
 
 const IssueManagement = ({ navigation }) => {
-  const [data, setData] = useState({ noStreetlight: 0 });
+  const [issues, setIssues] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -23,7 +23,21 @@ const IssueManagement = ({ navigation }) => {
         }
 
         const result = await response.json();
-        setData(result);
+
+        // Ensure result is an array
+        if (Array.isArray(result)) {
+          const formattedIssues = result.map((item) => ({
+            id: item.report_id || Math.random().toString(), // Ensure unique key
+            issue: item.problem_type || "Unknown Issue",
+            description: item.description || "No description available",
+            location: item.location || "Unknown location",
+            status: item.status || "Open",
+            imageUrl: item.imageUrl || "", // Add default if needed
+            updates: item.updates || [],
+            assignedLinesmen: item.assignedLinesmen || [],
+          }));
+          setIssues(formattedIssues);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -31,19 +45,6 @@ const IssueManagement = ({ navigation }) => {
 
     fetchData();
   }, []);
-  const [issues, setIssues] = useState([
-    {
-      id: data.report_id,
-      issue: data.problem_type,
-      description: "The streetlight at 123 Main St is completely out.",
-      location: "123 Main St",
-      status: "Open",
-      imageUrl: "https://example.com/broken-streetlight.jpg",
-      updates: [],
-      assignedLinesmen: [],
-    },
-    // ... add more sample issues
-  ]);
 
   const renderIssueItem = ({ item }) => (
     <TouchableOpacity
@@ -62,7 +63,7 @@ const IssueManagement = ({ navigation }) => {
       <FlatList
         data={issues}
         renderItem={renderIssueItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()} // Ensure unique key
       />
     </View>
   );

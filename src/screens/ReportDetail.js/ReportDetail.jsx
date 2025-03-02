@@ -15,6 +15,7 @@ import styles from "./styles";
 
 const ReportDetail = ({ route }) => {
   const { report } = route.params;
+  console.log(report);
   const [statusUpdate, setStatusUpdate] = useState("");
   const [updates, setUpdates] = useState(report.updates || []);
   const [selectedLinesmen, setSelectedLinesmen] = useState(
