@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import styles from "./styles";
 
 const IssueManagement = ({ navigation }) => {
   const [issues, setIssues] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "https://streetlightfix-backend-1.onrender.com/admin/report",
+          "http://192.168.0.21:3000/admin/report",
           {
             method: "GET",
             headers: {
@@ -23,7 +24,7 @@ const IssueManagement = ({ navigation }) => {
         }
 
         const result = await response.json();
-
+        console.log("Data fetched:", result);
         // Ensure result is an array
         if (Array.isArray(result)) {
           const formattedIssues = result.map((item) => ({
@@ -40,6 +41,8 @@ const IssueManagement = ({ navigation }) => {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Set loading to false after data is fetched
       }
     };
 
@@ -59,12 +62,17 @@ const IssueManagement = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Issue Management</Text>
-      <FlatList
-        data={issues}
-        renderItem={renderIssueItem}
-        keyExtractor={(item) => item.id.toString()} // Ensure unique key
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      ) : (
+        <FlatList
+          data={issues}
+          renderItem={renderIssueItem}
+          keyExtractor={(item) => item.id.toString()} // Ensure unique key
+        />
+      )}
     </View>
   );
 };
