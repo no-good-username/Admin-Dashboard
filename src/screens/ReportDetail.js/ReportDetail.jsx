@@ -92,7 +92,7 @@ const ReportDetail = React.memo(({ route, navigation }) => {
       // setStatusUpdate("");
       console.log("this is the message:",statusUpdate);
       
-      fetch(`http://192.168.0.21:3000/admin/report/statusMessages`, {
+      fetch(`http://192.168.0.14:3000/admin/report/statusMessages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
