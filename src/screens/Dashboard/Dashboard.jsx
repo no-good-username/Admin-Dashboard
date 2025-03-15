@@ -12,13 +12,14 @@ const Dashboard = ({ navigation }) => {
     unassignedTasks: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const response = await fetch(
-          "https://streetlightfix-backend-1.onrender.com/admin/home",
+          "https://streetlightfix-backend-1.onrender.com/admin/home/id",
           {
             method: "GET",
             headers: {
@@ -32,21 +33,32 @@ const Dashboard = ({ navigation }) => {
         }
 
         const result = await response.json();
+        console.log("API Response:", result);
+
         setData({
           noStreetlight: result.noStreetlight || 0,
           openIssues: result.OpenIssues || 15,
           completedTasks: result.countReport || 57,
           unassignedTasks: result.countReport || 7,
         });
+        const formattedActivity = (result.recentReport || []).map((item) => ({
+          title: item.problem_type,
+          location: item.description,
+          time: new Date(item.ReportcreatedAt).toLocaleString(), // Converts to readable format
+        }));
+
+        setRecentActivity(formattedActivity);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
-    };
+    }; //aa
 
     fetchData();
   }, []);
+
+  console.log("Data:", recentActivity);
 
   const stats = [
     {
@@ -102,23 +114,23 @@ const Dashboard = ({ navigation }) => {
     },
   ];
 
-  const recentActivity = [
-    {
-      title: "New Issue Reported",
-      location: "Main St & 5th Ave",
-      time: "10 mins ago",
-    },
-    {
-      title: "Issue Resolved",
-      location: "Park Blvd & Elm St",
-      time: "2 hours ago",
-    },
-    {
-      title: "Maintenance Scheduled",
-      location: "Center Ave",
-      time: "1 day ago",
-    },
-  ];
+  // const recentActivity = [
+  //   {
+  //     title: "New Issue Reported",
+  //     location: "Main St & 5th Ave",
+  //     time: "10 mins ago",
+  //   },
+  //   {
+  //     title: "Issue Resolved",
+  //     location: "Park Blvd & Elm St",
+  //     time: "2 hours ago",
+  //   },
+  //   {
+  //     title: "Maintenance Scheduled",
+  //     location: "Center Ave",
+  //     time: "1 day ago",
+  //   },
+  // ];
 
   return (
     <ScrollView style={styles.container}>
