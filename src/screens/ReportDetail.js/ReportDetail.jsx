@@ -38,14 +38,63 @@ const UpdateItem = React.memo(({ item }) => {
 const ReportDetail = React.memo(({ route, navigation }) => {
   const { report } = route.params;
   console.log(report)
+  const [linemen, setLinemen] = useState([""]);
   const [statusUpdate, setStatusUpdate] = useState("");
   const [updates, setUpdates] = useState(report.updates || []);
   const [selectedLinesmen, setSelectedLinesmen] = useState(
     report.assignedLinesmen || []
   );
+  const areaid = report.areaid;
   const [modalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    const fetchLinemen = async () => {
+      // console.log("Fetching linemen for area:", areaid); // Debugging log
+  
+      // if (!areaid) {
+      //   console.error("Area ID is undefined. Cannot fetch linemen.");
+      //   return;
+      // }
+  
+      setIsLoading(true);
+  
+      try {
+        // console.log("area id is:", areaid);
+        const response = await fetch(
+          `http://streetlightfix-backend-1.onrender.com/admin/linemen/13`
+        );
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status} ${response.statusText}`);
+        }
+  
+        const data = await response.json();
+        console.log("Fetched linemen data:", data); // Debugging log
+        
+
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid data format: Expected an array.");
+        }
+  
+        const formattedLinemen = data.map((item) => ({
+          label: item.Lineman_Name, // Name of lineman
+          value: String(item.linemen_id), // Convert ID to string for consistency
+        }));
+
+        setLinemen(formattedLinemen);
+      } catch (error) {
+        console.error("Error fetching linemen:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchLinemen();
+  }, []);
+  //, [areaid]);
+  
+  
   // Memoize linesmen data to prevent recreation on every render
   const linesmen = useMemo(() => [
     { label: "John Doe", value: "1" },
@@ -257,7 +306,7 @@ const ReportDetail = React.memo(({ route, navigation }) => {
           </View>
 
           <FlatList
-            data={linesmen}
+            data={linemen}
             renderItem={({ item }) => {
               const isSelected = selectedLinesmen.some((l) => l.value === item.value);
               return (
