@@ -262,6 +262,310 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "600",
   },
+  tasksHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+  tasksHeaderText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  addTaskButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  addTaskButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#000',
+    marginRight: 6,
+  },
+  tasksContainer: {
+    marginBottom: 20,
+  },
+  taskItem: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  taskHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+  taskDescription: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginRight: 12,
+  },
+  taskStatusBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    minWidth: 70,
+    alignItems: 'center',
+  },
+  taskStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  taskAssignees: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    flexWrap: 'wrap',
+  },
+  taskAssigneesLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginRight: 6,
+  },
+  assigneesList: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  assigneeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    marginRight: 6,
+    marginBottom: 4,
+  },
+  assigneeName: {
+    fontSize: 12,
+    color: '#333',
+    marginLeft: 4,
+  },
+  taskFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  taskTimestamp: {
+    fontSize: 12,
+    color: '#666',
+  },
+  taskActions: {
+    flexDirection: 'row',
+  },
+  taskActionButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginLeft: 8,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  inProgressButton: {
+    backgroundColor: '#007AFF22',
+  },
+  completeButton: {
+    backgroundColor: '#34C75922',
+  },
+  taskActionButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#333',
+  },
+  taskCompletedText: {
+    fontSize: 12,
+    color: '#34C759',
+  },
+  noTasksContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 24,
+  },
+  noTasksText: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
+  },
+  
+  // Task modal
+  taskInputContainer: {
+    marginBottom: 16,
+  },
+  taskInput: {
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 12,
+  },
+  modalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  assignTaskButton: {
+    backgroundColor: '#000',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    flex: 1,
+    marginLeft: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  assignTaskButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  cancelButton: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    flex: 1,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#374151',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  
+  // Status modal
+  statusModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+    maxHeight: '80%',
+  },
+  statusModalDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 16,
+  },
+  statusOptionsList: {
+    marginBottom: 20,
+  },
+  statusOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1.5,
+  },
+  statusOptionText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  statusCheckIcon: {
+    marginLeft: 8,
+  },
+  warningContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFEFEF',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  warningIcon: {
+    marginRight: 8,
+  },
+  warningText: {
+    fontSize: 14,
+    color: '#FF3B30',
+    flex: 1,
+  },
+  statusModalButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  updateStatusButton: {
+    backgroundColor: '#000',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    flex: 1,
+    marginLeft: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  updateStatusButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  
+  // Update existing styles for the status badge to make it clickable
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  // Add these styles to your existing styles object
+
+// Add these styles
+assignTaskButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: '#007AFF',
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  borderRadius: 8,
+  marginTop: 16,
+  width: '100%',
+},
+assignTaskButtonText: {
+  color: 'white',
+  fontWeight: '600',
+  fontSize: 16,
+  marginRight: 8,
+},
+assignTaskIcon: {
+  marginLeft: 4,
+},
+disabledButton: {
+  opacity: 0.7,
+},
 });
 
 export default styles;
