@@ -6,9 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  ScrollView,
   Modal,
   SectionList,
+  Alert,
+  ActivityIndicator
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import styles from "./styles";
@@ -37,14 +38,17 @@ const UpdateItem = React.memo(({ item }) => {
 
 const ReportDetail = React.memo(({ route, navigation }) => {
   const { report } = route.params;
-  console.log(report)
   const [statusUpdate, setStatusUpdate] = useState("");
   const [updates, setUpdates] = useState(report.updates || []);
   const [selectedLinesmen, setSelectedLinesmen] = useState(
     report.assignedLinesmen || []
   );
+  const [reportStatus, setReportStatus] = useState(report.status || "Open");
   const [modalVisible, setModalVisible] = useState(false);
+  const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [assigningTask, setAssigningTask] = useState(false);
 
   // Memoize linesmen data to prevent recreation on every render
   const linesmen = useMemo(() => [
@@ -54,29 +58,86 @@ const ReportDetail = React.memo(({ route, navigation }) => {
     { label: "Emily Brown", value: "4" },
   ], []);
 
-  // Fetch updates when component mounts
-  // useEffect(() => {
-  //   const fetchUpdates = async () => {
-  //     setIsLoading(true);
-  //     try {
-  //       // Replace with your actual API endpoint
-  //       const response = await fetch(
-  //         `https://streetlightfix-backend-1.onrender.com/admin/report/${report.id}/updates`
-  //       );
-        
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         setUpdates(data);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching updates:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
+  // Status options for the report
+  const statusOptions = useMemo(() => [
+    { label: "Open", value: "open", color: "#FF9500" },
+    { label: "In Progress", value: "in progress", color: "#007AFF" },
+    { label: "Resolved", value: "resolved", color: "#34C759" },
+    { label: "Cannot Fix", value: "cannot fix", color: "#FF3B30" },
+  ], []);
 
-  //   fetchUpdates();
-  // }, [report.id]);
+  // Assign task to selected linesmen and update status to "In Progress"
+  const assignTask = useCallback(() => {
+    if (selectedLinesmen.length === 0) {
+      Alert.alert("Error", "Please select at least one linesman before assigning a task.");
+      return;
+    }
+
+    setAssigningTask(true);
+
+    // In a real app, you would make an API call here
+    // This is a simulated API call
+    setTimeout(() => {
+      // Update the report status to "In Progress"
+      setReportStatus("In Progress");
+      
+      // Add an update about the task assignment
+      const assigneeNames = selectedLinesmen.map(l => l.label).join(", ");
+      const updateText = `Task assigned to ${assigneeNames}. Report status updated to In Progress.`;
+      
+      const newUpdate = {
+        id: Date.now().toString(),
+        text: updateText,
+        timestamp: new Date().toISOString(),
+      };
+      
+      setUpdates(prevUpdates => [newUpdate, ...prevUpdates]);
+      setAssigningTask(false);
+      
+      // Optionally, close the linesmen selection modal if open
+      setModalVisible(false);
+
+      // Notification
+      Alert.alert(
+        "Task Assigned",
+        `Task has been assigned to the selected linesmen and status updated to In Progress.`,
+        [{ text: "OK" }]
+      );
+    }, 800);
+  }, [selectedLinesmen]);
+
+  // Update the report status
+  const updateReportStatus = useCallback((status) => {
+    setUpdatingStatus(true);
+    
+    // In a real app, you would make an API call here
+    // This is a simulated API call
+    setTimeout(() => {
+      setReportStatus(status);
+      setStatusModalVisible(false);
+      setUpdatingStatus(false);
+      
+      // Add an update about the status change
+      const updateText = `Report status updated to: ${status}`;
+      
+      const newUpdate = {
+        id: Date.now().toString() + "-status",
+        text: updateText,
+        timestamp: new Date().toISOString(),
+      };
+      
+      setUpdates(prevUpdates => [newUpdate, ...prevUpdates]);
+      
+      // Notify the user if the issue is resolved or cannot be fixed
+      if (status.toLowerCase() === "resolved" || status.toLowerCase() === "cannot fix") {
+        Alert.alert(
+          "Report Closed",
+          `This report has been marked as ${status}. A notification has been sent to the user.`,
+          [{ text: "OK" }]
+        );
+      }
+    }, 500);
+  }, []);
 
   // Memoized function to send updates
   const sendUpdate = useCallback(() => {
@@ -89,10 +150,8 @@ const ReportDetail = React.memo(({ route, navigation }) => {
       
       // Optimistic update
       setUpdates(prevUpdates => [newUpdate, ...prevUpdates]);
-      // setStatusUpdate("");
-      console.log("this is the message:",statusUpdate);
       
-      fetch(`http://192.168.0.14:3000/admin/report/statusMessages`, {
+      fetch(`https://streetlightfix-backend-1.onrender.com/admin/report/statusMessages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,23 +164,19 @@ const ReportDetail = React.memo(({ route, navigation }) => {
       })
       .then(response => {
         if (!response.ok) {
-          console.log(response);
-          
           throw new Error('Failed to send update');
         }
         setStatusUpdate("");
-        // console.log(response.json());
       })
       .catch(error => {
         console.error("Failed to save update:", error);
-        console.log(error);
         // Rollback on error
         setUpdates(prevUpdates => prevUpdates.filter(update => update.id !== newUpdate.id));
       });
     }
   }, [statusUpdate, report.id]);
 
-  // Removed the debounce mechanism to make the input more responsive
+  // Handle status update input
   const handleStatusUpdate = useCallback((text) => {
     setStatusUpdate(text);
   }, []);
@@ -137,16 +192,17 @@ const ReportDetail = React.memo(({ route, navigation }) => {
 
   // Memoize status color function
   const getStatusColor = useCallback((status) => {
-    switch (status?.toLowerCase()) {
-      case "open":
-        return "#FF9500"; // Orange
-      case "in progress":
-        return "#007AFF"; // Blue
-      case "completed":
-        return "#34C759"; // Green
-      default:
-        return "#FF9500"; // Default to orange
-    }
+    const statusOption = statusOptions.find(option => 
+      option.value.toLowerCase() === (status?.toLowerCase() || "open")
+    );
+    return statusOption?.color || "#FF9500";
+  }, [statusOptions]);
+
+  // Get text color based on background color for better contrast
+  const getTextColor = useCallback((backgroundColor) => {
+    // Simple contrast check - use white text on dark backgrounds
+    const darkColors = ["#007AFF", "#000000", "#FF3B30"];
+    return darkColors.includes(backgroundColor) ? "#FFFFFF" : "#000000";
   }, []);
 
   // Memoize sections to prevent recreating on every render
@@ -159,9 +215,15 @@ const ReportDetail = React.memo(({ route, navigation }) => {
           <View style={styles.reportCard}>
             <View style={styles.reportHeader}>
               <Text style={styles.title}>{report.issue}</Text>
-              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(report.status) }]}>
-                <Text style={styles.statusText}>{report.status}</Text>
-              </View>
+              <TouchableOpacity 
+                style={[styles.statusBadge, { backgroundColor: getStatusColor(reportStatus) }]}
+                onPress={() => setStatusModalVisible(true)}
+              >
+                <Text style={[styles.statusText, { color: getTextColor(getStatusColor(reportStatus)) }]}>
+                  {reportStatus}
+                </Text>
+                <FontAwesome name="chevron-down" size={12} color={getTextColor(getStatusColor(reportStatus))} style={{ marginLeft: 4 }} />
+              </TouchableOpacity>
             </View>
             
             <View style={styles.locationContainer}>
@@ -228,6 +290,22 @@ const ReportDetail = React.memo(({ route, navigation }) => {
                   </TouchableOpacity>
                 </View>
               ))}
+              
+              {/* Assign Task Button */}
+              <TouchableOpacity
+                style={[styles.assignTaskButton, assigningTask && styles.disabledButton]}
+                onPress={assignTask}
+                disabled={assigningTask}
+              >
+                {assigningTask ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <>
+                    <Text style={styles.assignTaskButtonText}>Assign Task</Text>
+                    <FontAwesome name="tasks" size={16} color="white" style={styles.assignTaskIcon} />
+                  </>
+                )}
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.noLinesmenContainer}>
@@ -237,10 +315,10 @@ const ReportDetail = React.memo(({ route, navigation }) => {
         </>
       ),
     },
-  ], [report, updates, selectedLinesmen, statusUpdate, getStatusColor, toggleLinesman, sendUpdate, handleStatusUpdate]);
+  ], [report, updates, reportStatus, selectedLinesmen, statusUpdate, getStatusColor, toggleLinesman, sendUpdate, handleStatusUpdate, getTextColor, assignTask, assigningTask]);
 
-  // Memoize modal content
-  const renderModalContent = useMemo(() => (
+  // Memoize modal content - Linesmen selection
+  const renderLinesmenModalContent = useMemo(() => (
     <Modal
       animationType="slide"
       transparent={true}
@@ -255,6 +333,8 @@ const ReportDetail = React.memo(({ route, navigation }) => {
               <FontAwesome name="times" size={24} color="#000000" />
             </TouchableOpacity>
           </View>
+
+          <Text style={styles.modalSubtitle}>Select linesmen to assign:</Text>
 
           <FlatList
             data={linesmen}
@@ -287,16 +367,116 @@ const ReportDetail = React.memo(({ route, navigation }) => {
             initialNumToRender={10}
           />
 
-          <TouchableOpacity
-            style={styles.doneButton}
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={styles.doneButtonText}>Done</Text>
-          </TouchableOpacity>
+          <View style={styles.modalButtonsContainer}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          
+            <TouchableOpacity
+              style={styles.doneButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.doneButtonText}>Done</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
   ), [modalVisible, linesmen, selectedLinesmen, toggleLinesman]);
+
+  // Memoize status modal content
+  const renderStatusModalContent = useMemo(() => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={statusModalVisible}
+      onRequestClose={() => setStatusModalVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.statusModalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Update Report Status</Text>
+            <TouchableOpacity onPress={() => setStatusModalVisible(false)}>
+              <FontAwesome name="times" size={24} color="#000000" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={styles.statusModalDescription}>
+            Select the current status of this report:
+          </Text>
+          
+          <View style={styles.statusOptionsList}>
+            {statusOptions.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.statusOption, 
+                  { borderColor: option.color },
+                  reportStatus.toLowerCase() === option.value && { 
+                    backgroundColor: option.color,
+                    borderWidth: 0,
+                  }
+                ]}
+                onPress={() => updateReportStatus(option.label)}
+              >
+                <Text 
+                  style={[
+                    styles.statusOptionText, 
+                    { color: reportStatus.toLowerCase() === option.value ? 
+                      getTextColor(option.color) : option.color 
+                    }
+                  ]}
+                >
+                  {option.label}
+                </Text>
+                {reportStatus.toLowerCase() === option.value && (
+                  <FontAwesome 
+                    name="check" 
+                    size={16} 
+                    color={getTextColor(option.color)} 
+                    style={styles.statusCheckIcon}
+                  />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {(reportStatus.toLowerCase() === "resolved" || reportStatus.toLowerCase() === "cannot fix") && (
+            <View style={styles.warningContainer}>
+              <FontAwesome name="exclamation-circle" size={16} color="#FF3B30" style={styles.warningIcon} />
+              <Text style={styles.warningText}>
+                This will close the report and notify the user.
+              </Text>
+            </View>
+          )}
+          
+          <View style={styles.statusModalButtonsContainer}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setStatusModalVisible(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.updateStatusButton}
+              onPress={() => updateReportStatus(reportStatus)}
+              disabled={updatingStatus}
+            >
+              {updatingStatus ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text style={styles.updateStatusButtonText}>Update Status</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  ), [statusModalVisible, reportStatus, statusOptions, updateReportStatus, updatingStatus, getTextColor]);
 
   return (
     <View style={styles.container}>
@@ -316,7 +496,8 @@ const ReportDetail = React.memo(({ route, navigation }) => {
         windowSize={5}
         initialNumToRender={5}
       />
-      {renderModalContent}
+      {renderLinesmenModalContent}
+      {renderStatusModalContent}
     </View>
   );
 });
