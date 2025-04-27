@@ -23,7 +23,7 @@ const IssueManagement = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        "https://streetlightfix-backend-1.onrender.com/admin/Issue/3",
+        "https://streetlightfix-backend-1.onrender.com/admin/Issue/1",
         {
           method: "GET",
           headers: {

@@ -31,36 +31,93 @@ const SignUp = ({ navigation }) => {
   const [division, setDivision] = useState('');
   const [subDivision, setSubDivision] = useState('');
   const [area, setArea] = useState('');
+  const [selectedAreaId, setSelectedAreaId] = useState(null);
   
-  // Divisions data (replace with your actual data)
-  const divisions = ['Division 1', 'Division 2', 'Division 3'];
-  const subDivisionOptions = {
-    'Division 1': ['Sub 1A', 'Sub 1B', 'Sub 1C'],
-    'Division 2': ['Sub 2A', 'Sub 2B', 'Sub 2C'],
-    'Division 3': ['Sub 3A', 'Sub 3B', 'Sub 3C'],
-  };
-  const areaOptions = {
-    'Sub 1A': ['Area 1A-1', 'Area 1A-2'],
-    'Sub 1B': ['Area 1B-1', 'Area 1B-2'],
-    'Sub 1C': ['Area 1C-1', 'Area 1C-2'],
-    'Sub 2A': ['Area 2A-1', 'Area 2A-2'],
-    'Sub 2B': ['Area 2B-1', 'Area 2B-2'],
-    'Sub 2C': ['Area 2C-1', 'Area 2C-2'],
-    'Sub 3A': ['Area 3A-1', 'Area 3A-2'],
-    'Sub 3B': ['Area 3B-1', 'Area 3B-2'],
-    'Sub 3C': ['Area 3C-1', 'Area 3C-2'],
-  };
+  // States for API data
+  const [fetchedAreas, setFetchedAreas] = useState([]);
+  const [divisionsData, setDivisionsData] = useState([]);
+  const [subDivisionsData, setSubDivisionsData] = useState({});
+  const [areasData, setAreasData] = useState({});
+  const [areaIdsMap, setAreaIdsMap] = useState({});
+  const [dataLoading, setDataLoading] = useState(false);
   
   const [pendingVerification, setPendingVerification] = useState(false);
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Fetch areas data from the API
+  const fetchAreasData = async () => {
+    try {
+      setDataLoading(true);
+      const response = await fetch('http://192.168.0.5:3001/admin/fetchArea');
+      const result = await response.json();
+      
+      if (result.success) {
+        // Store raw data
+        setFetchedAreas(result.data);
+        
+        // Extract unique divisions
+        const uniqueDivisions = Array.from(
+          new Set(result.data.map(item => item.subdivision.division.name))
+        );
+        setDivisionsData(uniqueDivisions);
+        
+        // Group subdivisions by division
+        const subDivsByDivision = {};
+        uniqueDivisions.forEach(div => {
+          const relevantAreas = result.data.filter(
+            item => item.subdivision.division.name === div
+          );
+          const uniqueSubdivs = Array.from(
+            new Set(relevantAreas.map(item => item.subdivision.name))
+          );
+          subDivsByDivision[div] = uniqueSubdivs;
+        });
+        setSubDivisionsData(subDivsByDivision);
+        
+        // Group areas by subdivision and create area ID map
+        const areasBySubdiv = {};
+        const idsMap = {};
+        
+        Object.keys(subDivsByDivision).forEach(div => {
+          subDivsByDivision[div].forEach(subdiv => {
+            const relevantAreas = result.data.filter(
+              item => item.subdivision.name === subdiv
+            );
+            areasBySubdiv[subdiv] = relevantAreas.map(item => item.name);
+            
+            // Store area IDs by name for lookup
+            relevantAreas.forEach(item => {
+              idsMap[item.name] = item.id;
+            });
+          });
+        });
+        
+        setAreasData(areasBySubdiv);
+        setAreaIdsMap(idsMap);
+      } else {
+        setError('Failed to load area data');
+      }
+    } catch (err) {
+      console.error('Error fetching areas:', err);
+      setError('Error loading location data. Please try again later.');
+    } finally {
+      setDataLoading(false);
+    }
+  };
+  
+  // Fetch data when component mounts
+  useEffect(() => {
+    fetchAreasData();
+  }, []);
+
   // Reset subdivision and area when division changes
   useEffect(() => {
     if (division) {
       setSubDivision('');
       setArea('');
+      setSelectedAreaId(null);
     }
   }, [division]);
 
@@ -68,8 +125,18 @@ const SignUp = ({ navigation }) => {
   useEffect(() => {
     if (subDivision) {
       setArea('');
+      setSelectedAreaId(null);
     }
   }, [subDivision]);
+
+  // Update selectedAreaId when area changes
+  useEffect(() => {
+    if (area) {
+      setSelectedAreaId(areaIdsMap[area] || null);
+    } else {
+      setSelectedAreaId(null);
+    }
+  }, [area, areaIdsMap]);
 
   // Move to next stage
   const handleNextStage = () => {
@@ -83,7 +150,7 @@ const SignUp = ({ navigation }) => {
       setStage(2);
     } else if (stage === 2) {
       // Validate second stage
-      if (!division || !subDivision || !area) {
+      if (!division || !subDivision || !area || !selectedAreaId) {
         setError('All fields are required');
         return;
       }
@@ -106,6 +173,7 @@ const SignUp = ({ navigation }) => {
       setError('');
       setLoading(true);
       
+      // Create user with Clerk
       await signUp.create({
         firstName,
         lastName,
@@ -115,24 +183,25 @@ const SignUp = ({ navigation }) => {
           division,
           subDivision,
           area,
-          phoneNumber
+          phoneNumber,
+          selectedAreaId // Store areaId in metadata for later use
         }
       });
-
-      // Send verification email
+  
+      // Send verification email through Clerk
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       
       // Change UI to show verification form
       setPendingVerification(true);
     } catch (err) {
       console.error('Error during sign up:', err);
-      setError(err.errors?.[0]?.message || 'Failed to sign up');
+      setError(err.errors?.[0]?.message || err.message || 'Failed to sign up');
     } finally {
       setLoading(false);
     }
   };
-
-  // Verify email with the code
+  
+  // Verify email with the code and then register with backend
   const onVerifyPress = async () => {
     if (!code) {
       setError('Verification code is required');
@@ -147,10 +216,35 @@ const SignUp = ({ navigation }) => {
         code,
       });
       
+      // Now that email is verified, register with the backend
+      const backendResponse = await fetch('https://streetlightfix-backend-1.onrender.com/Signup/Engineer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          Data: {
+            FName: firstName,
+            LName: lastName,
+            Email: emailAddress,
+            Mobile: phoneNumber,
+            Wid: selectedAreaId
+          },
+          roles: "JuniorEngineer" 
+        })
+      });
+      
+      const backendResult = await backendResponse.json();
+      
+      if (!backendResponse.ok) {
+        throw new Error(backendResult.message || 'Failed to register with backend system');
+      }
+      
+      // After successful backend registration, set active session
       await setActive({ session: completeSignUp.createdSessionId });
     } catch (err) {
-      console.error('Error during verification:', err);
-      setError(err.errors?.[0]?.message || 'Failed to verify email');
+      console.error('Error during verification or backend registration:', err);
+      setError(err.errors?.[0]?.message || err.message || 'Failed to verify email or register with backend');
     } finally {
       setLoading(false);
     }
@@ -246,55 +340,65 @@ const SignUp = ({ navigation }) => {
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Division</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={division}
-            onValueChange={(itemValue) => setDivision(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Select Division" value="" />
-            {divisions.map((div) => (
-              <Picker.Item key={div} label={div} value={div} />
-            ))}
-          </Picker>
-        </View>
-      </View>
+      {dataLoading ? (
+        <ActivityIndicator size="large" color="#000" style={styles.loader} />
+      ) : (
+        <>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Division</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={division}
+                onValueChange={(itemValue) => setDivision(itemValue)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select Division" value="" />
+                {divisionsData.map((div) => (
+                  <Picker.Item key={div} label={div} value={div} />
+                ))}
+              </Picker>
+            </View>
+          </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Sub Division</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={subDivision}
-            onValueChange={(itemValue) => setSubDivision(itemValue)}
-            style={styles.picker}
-            enabled={!!division}
-          >
-            <Picker.Item label="Select Sub Division" value="" />
-            {division && subDivisionOptions[division]?.map((subdiv) => (
-              <Picker.Item key={subdiv} label={subdiv} value={subdiv} />
-            ))}
-          </Picker>
-        </View>
-      </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Sub Division</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={subDivision}
+                onValueChange={(itemValue) => setSubDivision(itemValue)}
+                style={styles.picker}
+                enabled={!!division}
+              >
+                <Picker.Item label="Select Sub Division" value="" />
+                {division && subDivisionsData[division]?.map((subdiv) => (
+                  <Picker.Item key={subdiv} label={subdiv} value={subdiv} />
+                ))}
+              </Picker>
+            </View>
+          </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Area</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={area}
-            onValueChange={(itemValue) => setArea(itemValue)}
-            style={styles.picker}
-            enabled={!!subDivision}
-          >
-            <Picker.Item label="Select Area" value="" />
-            {subDivision && areaOptions[subDivision]?.map((areaOption) => (
-              <Picker.Item key={areaOption} label={areaOption} value={areaOption} />
-            ))}
-          </Picker>
-        </View>
-      </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Area</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={area}
+                onValueChange={(itemValue) => setArea(itemValue)}
+                style={styles.picker}
+                enabled={!!subDivision}
+              >
+                <Picker.Item label="Select Area" value="" />
+                {subDivision && areasData[subDivision]?.map((areaOption) => (
+                  <Picker.Item key={areaOption} label={areaOption} value={areaOption} />
+                ))}
+              </Picker>
+            </View>
+          </View>
+          
+          {selectedAreaId && (
+            <Text style={styles.areaIdText}>Area ID: {selectedAreaId}</Text>
+          )}
+        </>
+      )}
 
       <View style={styles.buttonRow}>
         <TouchableOpacity
@@ -305,9 +409,9 @@ const SignUp = ({ navigation }) => {
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={[styles.navButton, styles.signUpButton, loading ? styles.disabledButton : null]}
+          style={[styles.navButton, styles.signUpButton, (loading || dataLoading) ? styles.disabledButton : null]}
           onPress={handleNextStage}
-          disabled={loading || !isLoaded}
+          disabled={loading || !isLoaded || dataLoading}
         >
           {loading ? (
             <ActivityIndicator size="small" color="white" />
@@ -481,6 +585,12 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
   },
+  areaIdText: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: -10,
+    marginBottom: 10,
+  },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -529,6 +639,9 @@ const styles = StyleSheet.create({
   signInLink: {
     color: '#000',
     fontWeight: '600',
+  },
+  loader: {
+    marginVertical: 20,
   },
 });
 

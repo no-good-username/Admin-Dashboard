@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import styles from "./styles";
-
+import { SignOutButton } from "../../components/signOutButton";
 const Dashboard = ({ navigation }) => {
   const [data, setData] = useState({
     noStreetlight: 0,
@@ -177,7 +177,7 @@ const Dashboard = ({ navigation }) => {
           </TouchableOpacity>
         ))}
       </View>
-
+      <SignOutButton />
       <Text style={styles.sectionTitle}>Recent Activity</Text>
       <View style={styles.recentActivityContainer}>
         {recentActivity.map((item, index) => (
