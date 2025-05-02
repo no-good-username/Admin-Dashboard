@@ -566,6 +566,92 @@ assignTaskIcon: {
 disabledButton: {
   opacity: 0.7,
 },
+// Add these styles to your existing styles object
+resolutionModalContent: {
+  backgroundColor: 'white',
+  borderRadius: 12,
+  padding: 20,
+  width: '90%',
+  maxHeight: '80%',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 5,
+},
+resolutionDescription: {
+  fontSize: 16,
+  marginBottom: 15,
+  color: '#333',
+},
+resolutionInput: {
+  borderWidth: 1,
+  borderColor: '#ddd',
+  borderRadius: 8,
+  padding: 12,
+  fontSize: 16,
+  minHeight: 100,
+  textAlignVertical: 'top',
+  marginBottom: 15,
+},
+imageUploadPlaceholder: {
+  borderWidth: 1,
+  borderStyle: 'dashed',
+  borderColor: '#ccc',
+  borderRadius: 8,
+  padding: 20,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: 15,
+  backgroundColor: '#f9f9f9',
+},
+imageUploadText: {
+  marginTop: 8,
+  color: '#666',
+  fontSize: 14,
+},
+resolveButton: {
+  backgroundColor: '#34C759',
+  paddingHorizontal: 20,
+  paddingVertical: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: 120,
+},
+resolveButtonText: {
+  color: 'white',
+  fontWeight: 'bold',
+  fontSize: 16,
+},
+warningButton: {
+  backgroundColor: '#FF9500', // Orange warning color
+  opacity: 0.8,
+},
+disabledStatusOption: {
+  opacity: 0.5,
+  backgroundColor: '#f0f0f0',
+},
+disabledStatusOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(255, 255, 255, 0.7)',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexDirection: 'row',
+  paddingHorizontal: 10,
+},
+disabledStatusIcon: {
+  marginRight: 4,
+},
+disabledStatusText: {
+  fontSize: 11,
+  color: '#FF3B30',
+  textAlign: 'center',
+},
 });
 
 export default styles;
