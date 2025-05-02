@@ -19,7 +19,7 @@ const Dashboard = ({ navigation }) => {
       setLoading(true);
       try {
         const response = await fetch(
-          "https://streetlightfix-backend-1.onrender.com/admin/home/id",
+          "https://streetlightfix-backend-1.onrender.com/admin/home/2",
           {
             method: "GET",
             headers: {
