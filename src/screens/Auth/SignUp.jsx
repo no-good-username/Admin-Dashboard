@@ -50,7 +50,7 @@ const SignUp = ({ navigation }) => {
   const fetchAreasData = async () => {
     try {
       setDataLoading(true);
-      const response = await fetch('http://192.168.0.5:3001/admin/fetchArea');
+      const response = await fetch('http://192.168.0.18:3001/admin/fetchArea');
       const result = await response.json();
       
       if (result.success) {
@@ -233,9 +233,9 @@ const SignUp = ({ navigation }) => {
           roles: "JuniorEngineer" 
         })
       });
-      
+      console.log(firstName, lastName, emailAddress, phoneNumber, selectedAreaId);
       const backendResult = await backendResponse.json();
-      
+      console.log('Backend registration result:', backendResult);
       if (!backendResponse.ok) {
         throw new Error(backendResult.message || 'Failed to register with backend system');
       }
