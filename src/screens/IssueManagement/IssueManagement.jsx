@@ -19,11 +19,30 @@ const IssueManagement = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [filterStatus, setFilterStatus] = useState("All");
 
+  // Status mapping between DB and frontend display values
+  const statusMapping = {
+    // DB value → Frontend display value
+    "Open": "Open",
+    "InProgress": "In Progress",
+    "Completed": "Resolved",
+    "Closed": "Closed"
+  };
+
+  // Reverse mapping for filtering (Frontend → DB)
+  const reverseStatusMapping = {
+    // Frontend display value → DB value
+    "All": "All",
+    "Open": "Open",
+    "In Progress": "InProgress",
+    "Resolved": "Completed",
+    "Closed": "Closed"
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "https://streetlightfix-backend-1.onrender.com/admin/Issue/1",
+        "https://streetlightfix-backend-1.onrender.com/admin/Issue/2",
         {
           method: "GET",
           headers: {
@@ -59,20 +78,25 @@ const IssueManagement = ({ navigation }) => {
             }
           }
 
+          // Map DB status to frontend display status
+          const displayStatus = statusMapping[item.Status] || "Open";
+
           return {
             id: item.report_id || Math.random().toString(),
-            issue: item.problem_type || "Unknown Issue",
+            taskId: item.id || "Unknown",
+            issue: item.title || "Unknown Issue",
             description: item.description || "No description available",
             location:
               item.Latitude && item.Longitude
                 ? `Lat: ${item.Latitude}, Lng: ${item.Longitude}`
                 : "Unknown location",
-            status: item.Status ? "Resolved" : "Open",
+            status: displayStatus, // Use the mapped display status
+            dbStatus: item.Status, // Keep the original DB status
             priority: item.priority || "Medium",
             date: formattedDate,
             imageUrl: item.url || "",
-            updates: item.Status_update ? [item.Status_update] : [],
-            assignedLinesmen: item.linemen_id ? [{ id: item.linemen_id }] : [],
+            updates: item.Status_update || [],
+            assignedLinesmen: [{ id: item.linemen_id || [] }] || [],
           };
         });
         setIssues(formattedIssues);
@@ -96,7 +120,10 @@ const IssueManagement = ({ navigation }) => {
 
   const getFilteredIssues = () => {
     if (filterStatus === "All") return issues;
-    return issues.filter((issue) => issue.status === filterStatus);
+    
+    // Use the reverse mapping to filter based on DB status values
+    const dbStatusToFilter = reverseStatusMapping[filterStatus];
+    return issues.filter((issue) => issue.dbStatus === dbStatusToFilter);
   };
 
   const getStatusStyle = (status) => {
@@ -182,11 +209,10 @@ const IssueManagement = ({ navigation }) => {
         </Text>
 
         <View style={styles.issueFooter}>
-          {item.assignedLinesmen && item.assignedLinesmen.length > 0 ? (
+          {item.assignedLinesmen && item.assignedLinesmen[0] && Array.isArray(item.assignedLinesmen[0].id) && item.assignedLinesmen[0].id.length > 0 ? (
             <View style={styles.assignedContainer}>
-              <FontAwesome5 name="user-hard-hat" size={14} color="#666" />
               <Text style={styles.assignedText}>
-                {item.assignedLinesmen.length} assigned
+                {item.assignedLinesmen[0].id.length} linesmen assigned
               </Text>
             </View>
           ) : (
@@ -299,13 +325,6 @@ const IssueManagement = ({ navigation }) => {
           }
         />
       )}
-
-      {/* <TouchableOpacity 
-        style={styles.fabButton}
-        onPress={() => navigation.navigate("CreateReport")}
-      >
-        <FontAwesome5 name="plus" size={20} color="#FFFFFF" />
-      </TouchableOpacity> */}
     </View>
   );
 };
