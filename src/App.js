@@ -8,7 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import RootNavigator from './navigation/AuthNavigator';
 import { TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-
+import { AlertProvider } from "./context/AlertContext";
 // Create a secure token cache
 const tokenCacheWithSecureStore = {
   async getToken(key) {
@@ -41,15 +41,17 @@ const publishableKey = "pk_test_YmFsYW5jZWQtYmxvd2Zpc2gtMjQuY2xlcmsuYWNjb3VudHMu
 
 const App = () => {
   return (
-    <ClerkProvider 
+    <ClerkProvider
       publishableKey={publishableKey}
       tokenCache={tokenCacheWithSecureStore}
     >
       <AuthProvider>
         <SafeAreaProvider>
-          <NavigationContainer>
-            <RootNavigator />
-          </NavigationContainer>
+          <AlertProvider>
+            <NavigationContainer>
+              <RootNavigator />
+            </NavigationContainer>
+          </AlertProvider>
         </SafeAreaProvider>
       </AuthProvider>
     </ClerkProvider>
