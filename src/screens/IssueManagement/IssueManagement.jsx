@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -7,162 +7,81 @@ import {
   ActivityIndicator,
   StatusBar,
   RefreshControl,
-  Image,
   ScrollView,
 } from "react-native";
+import { useFocusEffect } from '@react-navigation/native'; // Add this import
 import { FontAwesome5 } from "@expo/vector-icons";
 import styles from "./styles";
 
+// Import Zustand stores
+import useIssueStore from "./stores/issueStore";
+import useUIStore from "./stores/uiStore";
+import useReportsStore from "../../stores/reportsStore"; // Import global reports store
+
 const IssueManagement = ({ navigation }) => {
-  const [issues, setIssues] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [filterStatus, setFilterStatus] = useState("All");
+  // Access state and actions from stores
+  const {
+    issues,
+    loading,
+    refreshing,
+    filterStatus,
+    error,
+    fetchIssues,
+    refreshIssues,
+    setFilterStatus,
+    getFilteredIssues,
+    updateIssue
+  } = useIssueStore();
 
-  // Status mapping between DB and frontend display values
-  const statusMapping = {
-    // DB value → Frontend display value
-    "Open": "Open",
-    "InProgress": "In Progress",
-    "Completed": "Resolved",
-    "Closed": "Closed"
-  };
+  // Get global state
+  const { needsRefresh, lastUpdatedReport, clearNeedsRefresh } = useReportsStore();
 
-  // Reverse mapping for filtering (Frontend → DB)
-  const reverseStatusMapping = {
-    // Frontend display value → DB value
-    "All": "All",
-    "Open": "Open",
-    "In Progress": "InProgress",
-    "Resolved": "Completed",
-    "Closed": "Closed"
-  };
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(
-        "https://streetlightfix-backend-1.onrender.com/admin/Issue/2",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const result = (await response.json()).flat(); // Flatten the array
-
-      console.log("Data fetched:", result);
-
-      if (Array.isArray(result)) {
-        const formattedIssues = result.map((item) => {
-          let formattedDate = "Unknown date";
-          console.log("report date", item.ReportcreatedAt);
-          if (item.ReportcreatedAt) {
-            try {
-              const dateObj = new Date(item.ReportcreatedAt);
-              if (!isNaN(dateObj)) {
-                formattedDate = dateObj.toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                });
-              }
-            } catch (e) {
-              console.log("Error parsing date:", e);
-            }
-          }
-
-          // Map DB status to frontend display status
-          const displayStatus = statusMapping[item.Status] || "Open";
-
-          return {
-            id: item.report_id || Math.random().toString(),
-            taskId: item.id || "Unknown",
-            issue: item.title || "Unknown Issue",
-            description: item.description || "No description available",
-            location:
-              item.Latitude && item.Longitude
-                ? `Lat: ${item.Latitude}, Lng: ${item.Longitude}`
-                : "Unknown location",
-            status: displayStatus, // Use the mapped display status
-            dbStatus: item.Status, // Keep the original DB status
-            priority: item.priority || "Medium",
-            date: formattedDate,
-            imageUrl: item.url || "",
-            updates: item.Status_update || [],
-            assignedLinesmen: [{ id: item.linemen_id || [] }] || [],
-          };
-        });
-        setIssues(formattedIssues);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
+  // UI utility functions
+  const { getStatusStyle, getPriorityIcon } = useUIStore();
+  
+  // Fetch data on component mount
   useEffect(() => {
-    fetchData();
+    fetchIssues();
   }, []);
+  
+  // Check for updates when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("IssueManagement screen in focus, checking for updates");
+      console.log("Global state:", { needsRefresh, lastUpdatedReport: lastUpdatedReport?.id });
+      
+      if (needsRefresh && lastUpdatedReport) {
+        console.log("Updating local issue with new data:", lastUpdatedReport);
+        
+        // Update the local issue with the changed data
+        updateIssue(lastUpdatedReport.id, {
+          status: lastUpdatedReport.status,
+          dbStatus: lastUpdatedReport.dbStatus,
+          assignedLinesmen: lastUpdatedReport.assignedLinesmen
+        });
+        
+        // Clear the refresh flag
+        clearNeedsRefresh();
+      }
+      
+      return () => {};
+    }, [needsRefresh, lastUpdatedReport, updateIssue, clearNeedsRefresh])
+  );
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchData();
-  };
-
-  const getFilteredIssues = () => {
-    if (filterStatus === "All") return issues;
-    
-    // Use the reverse mapping to filter based on DB status values
-    const dbStatusToFilter = reverseStatusMapping[filterStatus];
-    return issues.filter((issue) => issue.dbStatus === dbStatusToFilter);
-  };
-
-  const getStatusStyle = (status) => {
-    switch (status.toLowerCase()) {
-      case "open":
-        return styles.statusOpen;
-      case "in progress":
-        return styles.statusInProgress;
-      case "resolved":
-        return styles.statusResolved;
-      case "closed":
-        return styles.statusClosed;
-      default:
-        return styles.statusOpen;
-    }
-  };
-
-  const getPriorityIcon = (priority) => {
-    switch (priority.toLowerCase()) {
-      case "high":
-        return { name: "exclamation-circle", color: "#FF3B30" };
-      case "medium":
-        return { name: "exclamation", color: "#FF9500" };
-      case "low":
-        return { name: "info-circle", color: "#34C759" };
-      default:
-        return { name: "exclamation", color: "#FF9500" };
-    }
-  };
-
+  // Render functions
   const renderIssueItem = ({ item }) => {
     const priorityIcon = getPriorityIcon(item.priority);
 
     return (
       <TouchableOpacity
         style={styles.issueItem}
-        onPress={() => navigation.navigate("ReportDetail", { report: item })}
+        onPress={() => {
+          console.log("Navigating to report with ID:", item.id, "and taskId:", item.taskId);
+          navigation.navigate("ReportDetail", { report: item });
+        }}
         activeOpacity={0.7}
       >
+        {/* Rest of your rendering code remains the same */}
         <View style={styles.issueHeader}>
           <View style={styles.issueTitleContainer}>
             <FontAwesome5
@@ -235,6 +154,7 @@ const IssueManagement = ({ navigation }) => {
     );
   };
 
+  // Rest of your component remains the same
   const renderFilterButton = (status) => (
     <TouchableOpacity
       style={[
@@ -291,7 +211,7 @@ const IssueManagement = ({ navigation }) => {
           <Text style={styles.emptySubtext}>
             Any reported issues will appear here
           </Text>
-          <TouchableOpacity style={styles.refreshButton} onPress={fetchData}>
+          <TouchableOpacity style={styles.refreshButton} onPress={fetchIssues}>
             <Text style={styles.refreshButtonText}>Refresh</Text>
           </TouchableOpacity>
         </View>
@@ -304,7 +224,7 @@ const IssueManagement = ({ navigation }) => {
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={onRefresh}
+              onRefresh={refreshIssues}
               colors={["#000000"]}
               tintColor="#000000"
             />

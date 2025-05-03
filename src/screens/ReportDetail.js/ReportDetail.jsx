@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import { View, SectionList, Text } from "react-native";
 import { useAlert } from "../../context/AlertContext";
 import styles from "./styles";
@@ -11,106 +11,79 @@ import StatusSelector from "./components/StatusSelector";
 import LinesmenSelector from "./components/LinesmenSelector";
 import ResolutionProofForm from "./components/ResolutionProofForm";
 
-// Import hooks
-import useLinesmen from "./hooks/useLinesmen";
-import useStatusUpdate from "./hooks/useStatusUpdate";
-import useUpdates from "./hooks/useUpdates";
+// Import stores
+import useLinesmenStore from "./stores/linesmenStore";
+import useReportStatusStore from "./stores/reportStatusStore";
+import useUpdatesStore from "./stores/updatesStore";
+import useReportActionsStore from "./stores/reportActionsStore";
 
 const ReportDetail = React.memo(({ route, navigation }) => {
   const { report } = route.params;
   const { showAlert } = useAlert();
   
-  // Status options for the report
-  const statusOptions = [
-    { label: "Open", value: "Open", color: "#FF9500" },
-    { label: "In Progress", value: "InProgress", color: "#007AFF" },
-    { label: "Resolved", value: "Completed", color: "#34C759" },
-    { label: "Closed", value: "Closed", color: "#FF3B30" },
-  ];
-
-  // Status update handling
-  const statusUpdateHandler = useCallback((newStatus, updateText) => {
-    updatesHook.addUpdate(updateText);
-  }, []);
-
-  // Initialize hooks
-  const linesmenHook = useLinesmen(report);
-  const statusHook = useStatusUpdate(report, statusOptions, statusUpdateHandler);
-  const updatesHook = useUpdates(report);
+  // Get state and actions from stores
+  const {
+    linesmen, 
+    selectedLinesmen, 
+    originalAssignedLinesmen,
+    loadingLinesmen,
+    linesmenError,
+    modalVisible,
+    assigningTask,
+    setModalVisible,
+    toggleLinesman,
+    hasLinesmenSelectionChanged,
+    initializeLinesmen,
+    setSelectedLinesmen,
+    clearSelections,
+    fetchLinesmen
+  } = useLinesmenStore();
   
-  // Function to unassign linesmen from the task
-  const unassignTask = useCallback(() => {
-    linesmenHook.setAssigningTask(true);
+  const {
+    statusOptions,
+    reportStatus,
+    statusModalVisible,
+    updatingStatus,
+    showResolutionModal,
+    resolutionProof,
+    selectedStatusToUpdate,
+    setStatusModalVisible,
+    setShowResolutionModal,
+    setResolutionProof,
+    setSelectedStatusToUpdate,
+    getStatusColor,
+    getTextColor,
+    initializeStatus
+  } = useReportStatusStore();
+  
+  const {
+    updates,
+    statusUpdate,
+    setStatusUpdate,
+    addUpdate,
+    initializeUpdates
+  } = useUpdatesStore();
+  
+  const { assignTask, unassignTask, updateStatus, sendUpdate } = useReportActionsStore();
+  
+  // Initialize data
+  useEffect(() => {
+    initializeLinesmen(report);
+    initializeStatus(report.dbStatus);
+    initializeUpdates(report.updates);
     
-    fetch('https://streetlightfix-backend-1.onrender.com/admin/assignTask', {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        taskid: report.taskId,
-        linemanid: [] // Empty array to unassign all
-      })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to unassign task. Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      // After successfully unassigning, update the status to "Open"
-      return fetch('https://streetlightfix-backend-1.onrender.com/admin/task/update', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          taskid: report.taskId,
-          status: "Open" // Reset status to Open
-        })
-      });
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to update status. Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(statusData => {
-      // Update UI state
-      statusHook.setReportStatus("Open");
+    // Clean up on unmount
+    return () => {
+      useLinesmenStore.getState().resetStore();
+      useReportStatusStore.getState().resetStore();
+      useUpdatesStore.getState().resetStore();
+    };
+  }, [report]);
   
-      // Add an update about the unassignment
-      const updateText = `All linesmen have been unassigned from this task. Status reset to Open.`;
-      updatesHook.addUpdate(updateText);
-  
-      showAlert({
-        type: 'success',
-        title: "Task Unassigned",
-        message: `All linesmen have been unassigned from this task and status reset to Open.`,
-        buttons: [{ text: "OK" }]
-      });
-    })
-    .catch(error => {
-      console.error("Error in unassign task flow:", error);
-      showAlert({
-        type: 'error',
-        title: "Unassignment Failed",
-        message: "There was an error unassigning this task. Please try again.",
-        buttons: [{ text: "OK" }]
-      });
-    })
-    .finally(() => {
-      linesmenHook.setAssigningTask(false);
-      linesmenHook.setModalVisible(false); // Close the modal after operation is complete
-    });
-  }, [report.taskId, showAlert, statusHook, updatesHook, linesmenHook]);
-  
-  // Updated toggleLinesman with unassign functionality
+  // Handle toggle linesman with unassign confirmation
   const handleToggleLinesman = useCallback((item) => {
-    const isRemovingLast = linesmenHook.selectedLinesmen.length === 1 && 
-                          linesmenHook.selectedLinesmen[0].value === item.value;
+    const isRemovingLast = selectedLinesmen.length === 1 && 
+                          selectedLinesmen[0].value === item.value;
     
     if (isRemovingLast) {
       showAlert({
@@ -123,20 +96,20 @@ const ReportDetail = React.memo(({ route, navigation }) => {
             text: "Yes, Unassign",
             style: "destructive",
             onPress: () => {
-              linesmenHook.setSelectedLinesmen([]);
-              unassignTask();
+              clearSelections();
+              handleUnassignTask();
             }
           }
         ]
       });
     } else {
-      linesmenHook.toggleLinesman(item);
+      toggleLinesman(item);
     }
-  }, [linesmenHook, unassignTask, showAlert]);
+  }, [selectedLinesmen, toggleLinesman, clearSelections, showAlert]);
   
-  // Assign task to selected linesmen
-  const assignTask = useCallback(() => {
-    if (linesmenHook.selectedLinesmen.length === 0) {
+  // Wrapper for assignTask with alerts
+  const handleAssignTask = useCallback(() => {
+    if (selectedLinesmen.length === 0) {
       showAlert({
         type: 'warning',
         title: "Selection Required",
@@ -145,86 +118,75 @@ const ReportDetail = React.memo(({ route, navigation }) => {
       });
       return;
     }
-  
-    linesmenHook.setAssigningTask(true);
-  
-    // Extract lineman IDs from selected linesmen objects
-    const linemanIds = linesmenHook.selectedLinesmen.map(linesman => parseInt(linesman.value));
     
-    fetch('https://streetlightfix-backend-1.onrender.com/admin/assignTask', {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
+    assignTask(report.taskId, 
+      // Success callback
+      () => {
+        showAlert({
+          type: 'success',
+          title: "Task Assigned",
+          message: `Task has been successfully assigned to the selected linesmen and status updated to In Progress.`,
+          buttons: [{ text: "OK" }]
+        });
       },
-      body: JSON.stringify({
-        taskid: report.taskId,
-        linemanid: linemanIds
-      })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to assign task. Status: ${response.status}`);
+      // Error callback
+      (errorMsg) => {
+        showAlert({
+          type: 'error',
+          title: "Assignment Failed",
+          message: errorMsg || "There was an error assigning this task or updating its status. Please try again.",
+          buttons: [{ text: "OK" }]
+        });
       }
-      return response.json();
-    })
-    .then(data => {
-      // After successfully assigning linesmen, update the status to "InProgress"
-      return fetch('https://streetlightfix-backend-1.onrender.com/admin/task/update', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          taskid: report.taskId,
-          status: "InProgress"
-        })
-      });
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to update status. Status: ${response.status}`);
+    );
+  }, [report.taskId, selectedLinesmen, assignTask, showAlert]);
+  
+  // Wrapper for unassignTask with alerts
+  const handleUnassignTask = useCallback(() => {
+    unassignTask(report.taskId, 
+      // Success callback
+      () => {
+        showAlert({
+          type: 'success',
+          title: "Task Unassigned",
+          message: `All linesmen have been unassigned from this task and status reset to Open.`,
+          buttons: [{ text: "OK" }]
+        });
+      },
+      // Error callback
+      (errorMsg) => {
+        showAlert({
+          type: 'error',
+          title: "Unassignment Failed",
+          message: errorMsg || "There was an error unassigning this task. Please try again.",
+          buttons: [{ text: "OK" }]
+        });
       }
-      return response.json();
-    })
-    .then(statusData => {
-      // Update UI state
-      statusHook.setReportStatus("In Progress");
-      
-      // Update original linesmen state to match the new selection
-      linesmenHook.setOriginalAssignedLinesmen([...linesmenHook.selectedLinesmen]);
+    );
+  }, [report.taskId, unassignTask, showAlert]);
   
-      // Add an update about the task assignment and status change
-      const assigneeNames = linesmenHook.selectedLinesmen.map(l => l.label).join(", ");
-      const updateText = `Task assigned to ${assigneeNames}. Report status updated to In Progress.`;
-      updatesHook.addUpdate(updateText);
+  // Wrapper for sendUpdate with alerts
+  const handleSendUpdate = useCallback(() => {
+    if (!statusUpdate.trim()) return;
+    
+    sendUpdate(report.taskId,
+      // Success callback 
+      () => {},
+      // Error callback
+      (errorMsg) => {
+        showAlert({
+          type: 'error',
+          title: "Update Failed",
+          message: errorMsg || "Failed to send the update. Please try again.",
+          buttons: [{ text: "OK" }]
+        });
+      }
+    );
+  }, [report.taskId, statusUpdate, sendUpdate, showAlert]);
   
-      showAlert({
-        type: 'success',
-        title: "Task Assigned",
-        message: `Task has been successfully assigned to the selected linesmen and status updated to In Progress.`,
-        buttons: [{ text: "OK" }]
-      });
-      
-      // Close the linesmen selection modal if open
-      linesmenHook.setModalVisible(false);
-    })
-    .catch(error => {
-      console.error("Error in assign task flow:", error);
-      showAlert({
-        type: 'error',
-        title: "Assignment Failed",
-        message: "There was an error assigning this task or updating its status. Please try again.",
-        buttons: [{ text: "OK" }]
-      });
-    })
-    .finally(() => {
-      linesmenHook.setAssigningTask(false);
-    });
-  }, [linesmenHook, report.taskId, showAlert, statusHook, updatesHook]);
-
   // Handle "Done" button in linesmen modal
   const handleLinesmenDone = useCallback(() => {
-    if (linesmenHook.originalAssignedLinesmen.length > 0 && linesmenHook.selectedLinesmen.length === 0) {
+    if (originalAssignedLinesmen.length > 0 && selectedLinesmen.length === 0) {
       showAlert({
         type: 'warning',
         title: "Unassign Task",
@@ -234,17 +196,17 @@ const ReportDetail = React.memo(({ route, navigation }) => {
             text: "Cancel",
             style: "cancel",
             onPress: () => {
-              linesmenHook.setSelectedLinesmen(linesmenHook.originalAssignedLinesmen);
+              setSelectedLinesmen(originalAssignedLinesmen);
             }
           },
           {
             text: "Yes, Unassign",
             style: "destructive",
-            onPress: unassignTask
+            onPress: handleUnassignTask
           }
         ]
       });
-    } else if (linesmenHook.hasLinesmenSelectionChanged() && linesmenHook.selectedLinesmen.length > 0) {
+    } else if (hasLinesmenSelectionChanged() && selectedLinesmen.length > 0) {
       showAlert({
         type: 'info',
         title: "Update Assignment",
@@ -253,25 +215,104 @@ const ReportDetail = React.memo(({ route, navigation }) => {
           { text: "Cancel", style: "cancel" },
           {
             text: "Update Assignment",
-            onPress: assignTask
+            onPress: handleAssignTask
           }
         ]
       });
     } else {
-      linesmenHook.setModalVisible(false);
+      setModalVisible(false);
     }
-  }, [linesmenHook, unassignTask, assignTask, showAlert]);
-
-  // Retry loading linesmen
-  const retryFetchLinesmen = useCallback(() => {
-    linesmenHook.fetchLinesmen();
-  }, [linesmenHook]);
+  }, [
+    originalAssignedLinesmen, 
+    selectedLinesmen, 
+    hasLinesmenSelectionChanged, 
+    setSelectedLinesmen, 
+    setModalVisible, 
+    handleUnassignTask, 
+    handleAssignTask, 
+    showAlert
+  ]);
   
   // Handle status option press
   const handleStatusOptionPress = useCallback((option) => {
-    statusHook.onStatusOptionPress(option, linesmenHook.selectedLinesmen);
-  }, [statusHook, linesmenHook.selectedLinesmen]);
-
+    const isOpenOption = option.value === "Open";
+    const shouldDisableOpen = isOpenOption && selectedLinesmen.length > 0;
+    const isClosedOption = option.label.toLowerCase() === "closed";
+    const canBeClosed = reportStatus.toLowerCase() === "resolved";
+    
+    if (shouldDisableOpen) {
+      return;
+    }
+    
+    if (isClosedOption && !canBeClosed) {
+      showAlert({
+        type: 'error',
+        title: "Status Flow Error",
+        message: "A report can only be closed after it has been resolved.",
+        buttons: [{ text: "OK" }]
+      });
+      return;
+    }
+    
+    if (option.label.toLowerCase() === "resolved") {
+      setSelectedStatusToUpdate(option.label);
+      setShowResolutionModal(true);
+      return;
+    }
+    
+    handleUpdateStatus(option.label);
+  }, [
+    reportStatus, 
+    selectedLinesmen, 
+    setSelectedStatusToUpdate, 
+    setShowResolutionModal, 
+    showAlert
+  ]);
+  
+  // Wrapper for updateStatus with alerts
+  const handleUpdateStatus = useCallback((statusLabel, proof = null) => {
+    updateStatus(
+      report.taskId,
+      statusLabel,
+      proof,
+      // Success callback
+      (newStatus) => {
+        if (newStatus.toLowerCase() === "resolved" || newStatus.toLowerCase() === "closed") {
+          showAlert({
+            type: 'success',
+            title: `Report ${newStatus}`,
+            message: `This report has been marked as ${newStatus}. A notification has been sent to the user.`,
+            buttons: [{ text: "OK" }]
+          });
+        }
+      },
+      // Error callback
+      (errorMsg) => {
+        showAlert({
+          type: 'error',
+          title: "Status Update Failed",
+          message: errorMsg || "There was an error updating the report status. Please try again.",
+          buttons: [{ text: "OK" }]
+        });
+      }
+    );
+  }, [report.taskId, updateStatus, showAlert]);
+  
+  // Handle resolution proof submit
+  const handleResolutionSubmit = useCallback((status, proof) => {
+    if (!proof.trim()) {
+      showAlert({
+        type: 'warning',
+        title: "Resolution Proof Required",
+        message: "Please provide details about how this issue was resolved.",
+        buttons: [{ text: "OK" }]
+      });
+      return;
+    }
+    
+    handleUpdateStatus(status, proof);
+  }, [handleUpdateStatus, showAlert]);
+  
   // Prepare sections for SectionList
   const sections = [
     {
@@ -280,31 +321,31 @@ const ReportDetail = React.memo(({ route, navigation }) => {
       renderItem: () => (
         <ReportInfo
           report={report}
-          statusUpdate={updatesHook.statusUpdate}
-          handleStatusUpdate={updatesHook.setStatusUpdate}
-          sendUpdate={updatesHook.sendUpdate}
-          reportStatus={statusHook.reportStatus}
-          getStatusColor={statusHook.getStatusColor}
-          getTextColor={statusHook.getTextColor}
-          onStatusPress={() => statusHook.setStatusModalVisible(true)}
+          statusUpdate={statusUpdate}
+          handleStatusUpdate={setStatusUpdate}
+          sendUpdate={handleSendUpdate}
+          reportStatus={reportStatus}
+          getStatusColor={getStatusColor}
+          getTextColor={getTextColor}
+          onStatusPress={() => setStatusModalVisible(true)}
         />
       ),
     },
     {
       title: "Updates",
       data: [{ id: "updates-section" }],
-      renderItem: () => <UpdatesList updates={updatesHook.updates} />,
+      renderItem: () => <UpdatesList updates={updates} />,
     },
     {
       title: "Assign Linesmen",
       data: [{ id: "linesmen-section" }],
       renderItem: () => (
         <LinesmenAssignment
-          selectedLinesmen={linesmenHook.selectedLinesmen}
+          selectedLinesmen={selectedLinesmen}
           toggleLinesman={handleToggleLinesman}
-          onShowModal={() => linesmenHook.setModalVisible(true)}
-          assignTask={assignTask}
-          isLoading={linesmenHook.assigningTask}
+          onShowModal={() => setModalVisible(true)}
+          assignTask={handleAssignTask}
+          isLoading={assigningTask}
         />
       ),
     },
@@ -331,41 +372,41 @@ const ReportDetail = React.memo(({ route, navigation }) => {
       
       {/* Modals */}
       <LinesmenSelector
-        isVisible={linesmenHook.modalVisible}
-        onClose={() => linesmenHook.setModalVisible(false)}
-        linesmen={linesmenHook.linesmen}
-        selectedLinesmen={linesmenHook.selectedLinesmen}
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        linesmen={linesmen}
+        selectedLinesmen={selectedLinesmen}
         toggleLinesman={handleToggleLinesman}
-        isLoading={linesmenHook.loadingLinesmen}
-        error={linesmenHook.linesmenError}
-        onRetry={retryFetchLinesmen}
+        isLoading={loadingLinesmen}
+        error={linesmenError}
+        onRetry={() => fetchLinesmen(report.areaId || 13)}
         onDone={handleLinesmenDone}
-        onCancel={() => linesmenHook.setModalVisible(false)}
+        onCancel={() => setModalVisible(false)}
       />
       
       <StatusSelector
-        isVisible={statusHook.statusModalVisible}
-        onClose={() => statusHook.setStatusModalVisible(false)}
+        isVisible={statusModalVisible}
+        onClose={() => setStatusModalVisible(false)}
         statusOptions={statusOptions}
-        currentStatus={statusHook.reportStatus}
+        currentStatus={reportStatus}
         onStatusPress={handleStatusOptionPress}
-        onUpdateStatus={statusHook.updateReportStatus}
-        selectedLinesmen={linesmenHook.selectedLinesmen}
-        isLoading={statusHook.updatingStatus}
-        getTextColor={statusHook.getTextColor}
+        onUpdateStatus={handleUpdateStatus}
+        selectedLinesmen={selectedLinesmen}
+        isLoading={updatingStatus}
+        getTextColor={getTextColor}
       />
       
       <ResolutionProofForm
-        isVisible={statusHook.showResolutionModal}
+        isVisible={showResolutionModal}
         onClose={() => {
-          statusHook.setShowResolutionModal(false);
-          statusHook.setSelectedStatusToUpdate(null);
+          setShowResolutionModal(false);
+          setSelectedStatusToUpdate(null);
         }}
-        resolutionProof={statusHook.resolutionProof}
-        setResolutionProof={statusHook.setResolutionProof}
-        onSubmit={statusHook.performStatusUpdate}
-        selectedStatus={statusHook.selectedStatusToUpdate}
-        isLoading={statusHook.updatingStatus}
+        resolutionProof={resolutionProof}
+        setResolutionProof={setResolutionProof}
+        onSubmit={handleResolutionSubmit}
+        selectedStatus={selectedStatusToUpdate}
+        isLoading={updatingStatus}
       />
     </View>
   );
