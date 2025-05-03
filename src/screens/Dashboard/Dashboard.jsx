@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import styles from "./styles";
 import { SignOutButton } from "../../components/signOutButton";
+import { dashboardApi } from '../../services/api';
 const Dashboard = ({ navigation }) => {
   const [data, setData] = useState({
     noStreetlight: 0,
@@ -18,21 +19,7 @@ const Dashboard = ({ navigation }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          "https://streetlightfix-backend-1.onrender.com/admin/home/2",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const result = await response.json();
+        const result = await dashboardApi.getDashboardData();
         console.log("API Response:", result);
 
         setData({
@@ -44,16 +31,16 @@ const Dashboard = ({ navigation }) => {
         const formattedActivity = (result.recentReport || []).map((item) => ({
           title: item.problem_type,
           location: item.description,
-          time: new Date(item.ReportcreatedAt).toLocaleString(), // Converts to readable format
+          time: new Date(item.ReportcreatedAt).toLocaleString(),
         }));
 
         setRecentActivity(formattedActivity);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setLoading(false);
       }
-    }; //aa
+    };
 
     fetchData();
   }, []);
