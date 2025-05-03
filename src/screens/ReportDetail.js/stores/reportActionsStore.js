@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { reportsApi } from '../../../services/api';
 import useLinesmenStore from './linesmenStore';
 import useReportStatusStore from './reportStatusStore';
 import useUpdatesStore from './updatesStore';
@@ -24,36 +25,10 @@ const useReportActionsStore = create((set, get) => ({
     
     try {
       // First, assign the task
-      const assignResponse = await fetch('https://streetlightfix-backend-1.onrender.com/admin/assignTask', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskid: reportId,
-          linemanid: linemanIds
-        })
-      });
-      
-      if (!assignResponse.ok) {
-        throw new Error(`Failed to assign task. Status: ${assignResponse.status}`);
-      }
-      
-      const assignData = await assignResponse.json();
+      await reportsApi.assignLinesmen(reportId, linemanIds);
       
       // Then, update the status to "InProgress"
-      const statusResponse = await fetch('https://streetlightfix-backend-1.onrender.com/admin/task/update', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskid: reportId,
-          status: "InProgress"
-        })
-      });
-      
-      if (!statusResponse.ok) {
-        throw new Error(`Failed to update status. Status: ${statusResponse.status}`);
-      }
-      
-      const statusData = await statusResponse.json();
+      await reportsApi.updateTaskStatus(reportId, "InProgress");
       
       // Update UI state
       reportStatusStore.setReportStatus("In Progress");
@@ -93,36 +68,10 @@ const useReportActionsStore = create((set, get) => ({
     
     try {
       // First, unassign the task
-      const assignResponse = await fetch('https://streetlightfix-backend-1.onrender.com/admin/assignTask', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskid: reportId,
-          linemanid: [] // Empty array to unassign all
-        })
-      });
-      
-      if (!assignResponse.ok) {
-        throw new Error(`Failed to unassign task. Status: ${assignResponse.status}`);
-      }
-      
-      const assignData = await assignResponse.json();
+      await reportsApi.assignLinesmen(reportId, []); // Empty array to unassign all
       
       // Then, update the status to "Open"
-      const statusResponse = await fetch('https://streetlightfix-backend-1.onrender.com/admin/task/update', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskid: reportId,
-          status: "Open" // Reset status to Open
-        })
-      });
-      
-      if (!statusResponse.ok) {
-        throw new Error(`Failed to update status. Status: ${statusResponse.status}`);
-      }
-      
-      const statusData = await statusResponse.json();
+      await reportsApi.updateTaskStatus(reportId, "Open"); // Reset status to Open
       
       // Update UI state
       reportStatusStore.setReportStatus("Open");
@@ -160,27 +109,10 @@ const useReportActionsStore = create((set, get) => ({
     reportStatusStore.setUpdatingStatus(true);
     
     const statusValue = reportStatusStore.getStatusValue(statusLabel);
-    const requestPayload = {
-      taskid: reportId,
-      status: statusValue
-    };
-    
-    if (proof) {
-      requestPayload.resolutionProof = proof;
-    }
     
     try {
-      const response = await fetch('https://streetlightfix-backend-1.onrender.com/admin/task/update', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestPayload)
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to update status. Status: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      // Update status via API
+      await reportsApi.updateTaskStatus(reportId, statusValue, proof);
       
       // Update UI state
       reportStatusStore.setReportStatus(statusLabel);
@@ -231,18 +163,7 @@ const useReportActionsStore = create((set, get) => ({
     updatesStore.setUpdates([newUpdate, ...updatesStore.updates]);
     
     try {
-      const response = await fetch(`https://streetlightfix-backend-1.onrender.com/admin/updateStatus`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskid: reportId,
-          status: statusUpdate.trim()
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to send update');
-      }
+      await reportsApi.sendStatusUpdate(reportId, statusUpdate.trim());
       
       updatesStore.setStatusUpdate("");
       if (onSuccess) onSuccess();
