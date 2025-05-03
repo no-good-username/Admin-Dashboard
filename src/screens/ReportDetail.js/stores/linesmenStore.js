@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { useAlert } from "../../../context/AlertContext";
+import { linesmenApi } from '../../../services/api';
 
 const useLinesmenStore = create((set, get) => ({
   // State
@@ -59,13 +59,11 @@ const useLinesmenStore = create((set, get) => ({
     set({ loadingLinesmen: true, linesmenError: null });
     
     try {
-      const response = await fetch(`https://streetlightfix-backend-1.onrender.com/admin/linemen/${areaId}`);
+      // Ensure areaId is a string
+      const areaIdString = String(areaId);
+      console.log(`Fetching linesmen for area ID: ${areaIdString}`);
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const data = await linesmenApi.getLinesmen(areaIdString);
       
       // Transform data
       const formattedLinesmen = data.map(lineman => ({
