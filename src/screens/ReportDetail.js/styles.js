@@ -1,4 +1,3 @@
-// screens/ReportDetail/styles.js
 import { StyleSheet, Dimensions } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -429,19 +428,24 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   assignTaskButton: {
-    backgroundColor: '#000',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    flex: 1,
-    marginLeft: 10,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 16,
+    width: '100%',
   },
   assignTaskButtonText: {
     color: 'white',
     fontWeight: '600',
     fontSize: 16,
+    marginRight: 8,
+  },
+  assignTaskIcon: {
+    marginLeft: 4,
   },
   cancelButton: {
     backgroundColor: '#F3F4F6',
@@ -457,7 +461,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   disabledButton: {
-    opacity: 0.5,
+    backgroundColor: '#E0E0E0',
+    opacity: 0.7,
+    elevation: 0,
   },
   
   // Status modal
@@ -530,128 +536,313 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
+  disabledStatusOption: {
+    opacity: 0.5,
+    backgroundColor: '#f0f0f0',
+  },
+  disabledStatusOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+  },
+  disabledStatusIcon: {
+    marginRight: 4,
+  },
+  disabledStatusText: {
+    fontSize: 11,
+    color: '#FF3B30',
+    textAlign: 'center',
+  },
   
-  // Update existing styles for the status badge to make it clickable
-  statusBadge: {
+  // Resolution modal
+  resolutionModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    width: '90%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  resolutionDescription: {
+    fontSize: 16,
+    marginBottom: 15,
+    color: '#333',
+  },
+  resolutionInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    minHeight: 100,
+    textAlignVertical: 'top',
+    marginBottom: 15,
+  },
+  imageUploadPlaceholder: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+    backgroundColor: '#f9f9f9',
+  },
+  imageUploadText: {
+    marginTop: 8,
+    color: '#666',
+    fontSize: 14,
+  },
+  resolveButton: {
+    backgroundColor: '#34C759',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 120,
+  },
+  resolveButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  warningButton: {
+    backgroundColor: '#FF9500',
+    opacity: 0.8,
+  },
+  
+  // NEW ENHANCED STYLES FOR REPORTINFO COMPONENT
+  // Enhanced report info container
+  reportInfoContainer: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 8,
+    marginVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+
+  // Enhanced status badge
+  enhancedStatusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    alignSelf: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 30,
+    marginBottom: 16,
+  },
+  enhancedStatusText: {
+    fontSize: 14,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  statusIcon: {
+    marginRight: 6,
+  },
+
+  // Enhanced title
+  enhancedReportTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    lineHeight: 32,
+  },
+
+  // Reporter card
+  reporterCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+  },
+  reporterHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  reporterCardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
     marginLeft: 8,
   },
-  // Add these styles to your existing styles object
+  reporterInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+  },
+  reporterDetail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    minWidth: '48%',
+  },
+  reporterDetailText: {
+    marginLeft: 10,
+    fontSize: 15,
+    color: '#444',
+  },
 
-// Add these styles
-assignTaskButton: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: '#007AFF',
-  paddingVertical: 12,
-  paddingHorizontal: 16,
-  borderRadius: 8,
-  marginTop: 16,
-  width: '100%',
-},
-assignTaskButtonText: {
-  color: 'white',
-  fontWeight: '600',
-  fontSize: 16,
-  marginRight: 8,
-},
-assignTaskIcon: {
-  marginLeft: 4,
-},
-disabledButton: {
-  opacity: 0.7,
-},
-// Add these styles to your existing styles object
-resolutionModalContent: {
-  backgroundColor: 'white',
-  borderRadius: 12,
-  padding: 20,
-  width: '90%',
-  maxHeight: '80%',
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
-  elevation: 5,
-},
-resolutionDescription: {
-  fontSize: 16,
-  marginBottom: 15,
-  color: '#333',
-},
-resolutionInput: {
-  borderWidth: 1,
-  borderColor: '#ddd',
-  borderRadius: 8,
-  padding: 12,
-  fontSize: 16,
-  minHeight: 100,
-  textAlignVertical: 'top',
-  marginBottom: 15,
-},
-imageUploadPlaceholder: {
-  borderWidth: 1,
-  borderStyle: 'dashed',
-  borderColor: '#ccc',
-  borderRadius: 8,
-  padding: 20,
-  alignItems: 'center',
-  justifyContent: 'center',
-  marginBottom: 15,
-  backgroundColor: '#f9f9f9',
-},
-imageUploadText: {
-  marginTop: 8,
-  color: '#666',
-  fontSize: 14,
-},
-resolveButton: {
-  backgroundColor: '#34C759',
-  paddingHorizontal: 20,
-  paddingVertical: 12,
-  borderRadius: 8,
-  alignItems: 'center',
-  justifyContent: 'center',
-  minWidth: 120,
-},
-resolveButtonText: {
-  color: 'white',
-  fontWeight: 'bold',
-  fontSize: 16,
-},
-warningButton: {
-  backgroundColor: '#FF9500', // Orange warning color
-  opacity: 0.8,
-},
-disabledStatusOption: {
-  opacity: 0.5,
-  backgroundColor: '#f0f0f0',
-},
-disabledStatusOverlay: {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(255, 255, 255, 0.7)',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexDirection: 'row',
-  paddingHorizontal: 10,
-},
-disabledStatusIcon: {
-  marginRight: 4,
-},
-disabledStatusText: {
-  fontSize: 11,
-  color: '#FF3B30',
-  textAlign: 'center',
-},
+  // Enhanced image container
+  enhancedImageContainer: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    elevation: 3,
+    backgroundColor: '#f0f0f0',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  enhancedReportImage: {
+    width: '100%',
+    height: 220,
+    borderRadius: 12,
+  },
+
+  // Description area
+  descriptionContainer: {
+    marginBottom: 20,
+  },
+  descriptionLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#888',
+    marginBottom: 8,
+    letterSpacing: 0.8,
+  },
+  enhancedReportDescription: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+  },
+
+  // Location card
+  locationCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  locationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  locationTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 8,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  detailText: {
+    marginLeft: 12,
+    fontSize: 15,
+    color: '#444',
+  },
+
+  // Enhanced divider
+  enhancedDivider: {
+    height: 1,
+    backgroundColor: '#e5e5e5',
+    marginVertical: 20,
+  },
+
+  // Update section
+  updateSectionContainer: {
+    marginTop: 10,
+  },
+  updateSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  enhancedUpdateInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 15,
+    color: '#333',
+    minHeight: 120,
+    textAlignVertical: 'top',
+    backgroundColor: '#f9f9f9',
+    marginBottom: 16,
+  },
+
+  // Enhanced button
+  enhancedButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    flexDirection: 'row',
+  },
+  enhancedButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+    marginRight: 8,
+  },
+  buttonIcon: {
+    marginLeft: 6,
+  },
+  viewOnMapButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4285F4', // Google Maps blue color
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginVertical: 12,
+    alignSelf: 'flex-start',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.5,
+  },
+  viewOnMapButtonText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  mapButtonIcon: {
+    marginRight: 8,
+  },
 });
 
 export default styles;
