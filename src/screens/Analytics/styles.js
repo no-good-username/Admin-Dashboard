@@ -1,174 +1,146 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F7',
+    backgroundColor: "#F8F9FA",
   },
   contentContainer: {
     paddingBottom: 30,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F7',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8F9FA",
   },
   loadingText: {
-    marginTop: 10,
     fontSize: 16,
-    color: '#333',
+    color: "#555555",
+    marginTop: 12,
   },
-  
+
   // Header styles
   headerContainer: {
-    backgroundColor: '#000000',
-    paddingTop: 30,
-    paddingBottom: 20,
     paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEEEEE",
   },
   headerTitle: {
-    color: '#FFFFFF',
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+    color: "#333333",
+    marginBottom: 4,
   },
   headerSubtitle: {
-    color: '#CCCCCC',
-    fontSize: 14,
-    marginTop: 4,
-  },
-
-  // Filter bar styles
-  filterBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-  },
-  filterLabel: {
-    fontSize: 15,
-    color: '#333',
-    fontWeight: '500',
-  },
-  dropdownButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0F0F0',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  dropdownButtonText: {
-    fontSize: 14,
-    color: '#333',
-    marginRight: 8,
-  },
-
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#000',
-    textAlign: 'center',
-  },
-  dropdownOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-  },
-  selectedOption: {
-    backgroundColor: '#F0F0F0',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-  },
-  dropdownOptionText: {
     fontSize: 16,
-    color: '#333',
+    color: "#666666",
   },
-  selectedOptionText: {
-    fontWeight: 'bold',
-    color: '#000',
+  
+  // Global filter styles
+  globalFilterContainer: {
+    backgroundColor: "#F0F8FF",
+    padding: 16,
+    margin: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#D4E6FF",
+  },
+  globalFilterLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginBottom: 10,
+  },
+  globalDatePickers: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+  globalDateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#D4E6FF",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    marginRight: 5,
+    marginBottom: 5,
+  },
+  globalDateText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  dateRangeDivider: {
+    marginHorizontal: 6,
+    fontSize: 14,
+    color: "#666",
+  },
+  datePickerIcon: {
+    marginRight: 6,
+  },
+  applyButton: {
+    backgroundColor: "#007AFF",
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    marginLeft: 10,
+  },
+  applyButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "500",
   },
 
-  // Section header styles
+  // Section styles
   metricsHeader: {
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 10,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'column',
-    marginBottom: 12,
+    marginBottom: 16,
+    marginTop: 8,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "600",
+    color: "#333333",
+    marginBottom: 2,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#666',
-    marginTop: 2,
+    color: "#666666",
+    marginBottom: 4,
   },
 
-  // Card styles
+  // Summary cards
   summaryRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 15,
-    justifyContent: 'space-between',
-    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
   summaryCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '48%',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    width: "48%",
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2.22,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   cardIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#007AFF",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   cardContent: {
@@ -176,167 +148,160 @@ export const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 2,
+    color: "#666666",
   },
   cardValue: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 2,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333333",
+    marginVertical: 2,
   },
   cardSubtitle: {
     fontSize: 12,
-    color: '#999',
+    color: "#999999",
   },
 
-  // Chart styles
-  chartContainer: {
-    backgroundColor: '#FFFFFF',
+  // Charts
+  chartSection: {
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
-    marginHorizontal: 20,
-    marginVertical: 10,
-    paddingTop: 15,
-    paddingBottom: 10, // Reduced bottom padding
-    paddingHorizontal: 10, // Reduced horizontal padding
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2.22,
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
     elevation: 2,
-    alignItems: 'center', // Center the chart
   },
-  chartTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 2,
+  sectionHeader: {
+    marginBottom: 16,
   },
-  chartSubtitle: {
+  sectionTitleContainer: {
+    marginBottom: 12,
+  },
+  sectionDatePicker: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  datePickerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  datePickerText: {
     fontSize: 13,
-    color: '#666',
-    marginBottom: 10, // Reduced margin
+    color: "#333",
+  },
+  chartContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+    paddingBottom: 10,
   },
   chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+  },
+  chartInsights: {
+    backgroundColor: "#F9F9F9",
     borderRadius: 8,
-    marginRight: -15, // Negative margin to adjust chart positioning
+    padding: 12,
   },
-
-  // Block styles
-  block: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginHorizontal: 20,
-    marginVertical: 10,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2.22,
-    elevation: 2,
+  insightItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
   },
-
-  // Division styles
-  divisionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginVertical: 10,
-  },
-  divisionNameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '25%',
-  },
-  divisionDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+  insightIcon: {
     marginRight: 8,
   },
-  divisionName: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
-  },
-  progressBarContainer: {
+  insightText: {
+    fontSize: 13,
+    color: "#555555",
     flex: 1,
-    height: 8,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginHorizontal: 10,
-  },
-  progressBar: {
-    height: '100%',
-  },
-  divisionPercentage: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    width: '10%',
-    textAlign: 'right',
   },
 
-  // Table styles
-  technicianTable: {
-    marginTop: 10,
-    borderRadius: 8,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#E5E5E5',
+  // Technician table
+  techTable: {
+    marginBottom: 16,
   },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#F5F5F5',
+  techTableHeader: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEEEEE",
+    paddingBottom: 8,
+    marginBottom: 8,
   },
-  tableRow: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
-  },
-  tableCell: {
-    padding: 12,
-    justifyContent: 'center',
-  },
-  tableHeaderCell: {
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  nameCell: {
-    flex: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dataCell: {
+  techTableCell: {
     flex: 1,
-    textAlign: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  techIcon: {
-    marginRight: 6,
-  },
-  techName: {
-    color: '#333',
+    paddingVertical: 6,
     fontSize: 14,
   },
-  tasksValue: {
-    fontWeight: '600',
+  techTableHeaderCell: {
+    fontWeight: "500",
+    color: "#666666",
   },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  techNameCell: {
+    flex: 1.5,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  ratingValue: {
-    fontWeight: '600',
-    marginRight: 4,
+  techTableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F5F5F5",
   },
+  techIcon: {
+    marginRight: 10,
+  },
+  techName: {
+    fontSize: 14,
+    color: "#333333",
+  },
+  techCompletedValue: {
+    fontWeight: "500",
+    color: "#007AFF",
+  },
+  // Add these new styles to your existing styles object
+
+globalFilterContainer: {
+  backgroundColor: "#F0F8FF",
+  padding: 16,
+  margin: 16,
+  borderRadius: 10,
+  borderWidth: 1,
+  borderColor: "#D4E6FF",
+},
+globalFilterLabel: {
+  fontSize: 16,
+  fontWeight: "500",
+  color: "#333",
+  marginBottom: 10,
+},
+globalDatePickers: {
+  flexDirection: "row",
+  alignItems: "center",
+  flexWrap: "wrap",
+  marginBottom: 10,
+},
+quickDateOptions: {
+  flexDirection: "row",
+  marginTop: 8,
+  justifyContent: "space-between",
+},
+quickDateButton: {
+  backgroundColor: "#E6F0FF",
+  paddingVertical: 6,
+  paddingHorizontal: 12,
+  borderRadius: 6,
+  borderWidth: 1,
+  borderColor: "#D4E6FF",
+},
+quickDateText: {
+  fontSize: 13,
+  color: "#007AFF",
+}
 });
