@@ -326,5 +326,54 @@ export default StyleSheet.create({
     fontSize: 16,
     color: '#666666',
     fontWeight: '500',
-  }
+  },
+  // Add these styles to your styles.js file for the report screen
+
+pdfPreviewContainer: {
+  flex: 1,
+  backgroundColor: '#fff',
+},
+pdfPreviewHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  backgroundColor: '#FFFFFF',
+  padding: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: '#E5E5E5',
+},
+pdfPreviewTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  color: '#333',
+},
+pdfPreviewCloseButton: {
+  padding: 8,
+},
+pdfPreview: {
+  flex: 1,
+  backgroundColor: '#FFFFFF',
+},
+pdfPreviewFooter: {
+  padding: 16,
+  backgroundColor: '#FFFFFF',
+  borderTopWidth: 1,
+  borderTopColor: '#E5E5E5',
+},
+pdfPreviewShareButton: {
+  backgroundColor: '#007AFF',
+  paddingVertical: 12,
+  paddingHorizontal: 16,
+  borderRadius: 8,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+pdfPreviewShareButtonText: {
+  color: '#FFFFFF',
+  fontSize: 16,
+  fontWeight: '600',
+  marginLeft: 8,
+},
+  
 });
