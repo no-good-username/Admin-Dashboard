@@ -140,6 +140,7 @@ const Dashboard = ({ navigation }) => {
           ))}
         </View>
       </View>
+      
 
       <Text style={styles.sectionTitle}>Quick Access</Text>
       <View style={styles.quickAccessContainer}>
@@ -164,7 +165,7 @@ const Dashboard = ({ navigation }) => {
           </TouchableOpacity>
         ))}
       </View>
-      <SignOutButton />
+      
       <Text style={styles.sectionTitle}>Recent Activity</Text>
       <View style={styles.recentActivityContainer}>
         {recentActivity.map((item, index) => (
@@ -178,6 +179,7 @@ const Dashboard = ({ navigation }) => {
           </View>
         ))}
       </View>
+      <SignOutButton />
     </ScrollView>
   );
 };

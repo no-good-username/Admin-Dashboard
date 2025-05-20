@@ -28,16 +28,16 @@ const JECoverageMapView = () => {
   // Demo polygon - simulating JE coverage area
   const demoPolygon = {
     id: 'je-area',
-    name: 'Your Service Area',
+    name: 'Goa Engineering College',
     coordinates: [
-      { latitude: 15.4250585, longitude: 73.9775675 },
-      { latitude: 15.4244794, longitude: 73.9770578 },
-      { latitude: 15.4238847, longitude: 73.9775299 },
-      { latitude: 15.4238226, longitude: 73.9786242 },
-      { latitude: 15.4244173, longitude: 73.9794289 },
-      { latitude: 15.4250534, longitude: 73.9790963 },
-      { latitude: 15.4253223, longitude: 73.9784097 },
-      { latitude: 15.4250585, longitude: 73.9775675 }
+      { latitude: 15.4285271, longitude: 73.9785061 },
+  { latitude: 15.4260656, longitude: 73.9768968 },
+  { latitude: 15.4207496, longitude: 73.9772615 },
+  { latitude: 15.4189293, longitude: 73.9781199 },
+  { latitude: 15.4193016, longitude: 73.9835057 },
+  { latitude: 15.4259208, longitude: 73.9847932 },
+  { latitude: 15.4301198, longitude: 73.9827762 },
+  { latitude: 15.4285271, longitude: 73.9785061 }
     ],
     fillColor: 'rgba(0, 122, 255, 0.2)',
     strokeColor: '#007AFF',

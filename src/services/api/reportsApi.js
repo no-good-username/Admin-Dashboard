@@ -2,7 +2,7 @@ import { apiRequest } from './config';
 
 const reportsApi = {
   // Get all issues/reports
-  getIssues: () => apiRequest('/admin/Issue/1'),
+  getIssues: () => apiRequest('/admin/Issue/3'),
   
   // Get a specific report by ID
   getReportById: (reportId) => apiRequest(`/admin/task/${reportId}`),

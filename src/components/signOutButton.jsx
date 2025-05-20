@@ -17,5 +17,5 @@ export const SignOutButton = () => {
     }
   }
 
-  return <Button title="Sign out" onPress={handleSignOut} />
+  return <Button color="#000000" marg title="Sign out" onPress={handleSignOut} />
 }

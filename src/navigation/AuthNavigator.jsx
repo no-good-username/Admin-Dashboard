@@ -44,9 +44,9 @@ const AppNavigator = () => {
       initialRouteName="Dashboard"
       screenOptions={({ navigation }) => ({
         headerStyle: {
-          backgroundColor: "#fff",
+          backgroundColor: "#000000",
         },
-        headerTintColor: "#333",
+        headerTintColor: "#fff",
       })}
     >
       <AppStack.Screen
