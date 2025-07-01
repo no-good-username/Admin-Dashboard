@@ -16,6 +16,7 @@ import { WebView } from 'react-native-webview';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import useIssueStore from '../IssueManagement/stores/issueStore'; // Import issue store
+import { fetchLinesmenAssignments } from '../../services/api/linesmenService';
 import styles from './styles';
 import CustomDatePicker from '../../components/CustomDatePicker';
 
@@ -488,6 +489,329 @@ const Reports = () => {
     `;
   };
 
+  // Generate Linesmen Assignments HTML
+  const generateLinesmenAssignmentsHTML = (linesmenData) => {
+    if (!linesmenData || !linesmenData.summaryData || !linesmenData.dailyData) {
+      return `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+                padding: 20px; 
+                color: #333;
+                line-height: 1.5;
+                text-align: center;
+              }
+              h1 { 
+                color: #333; 
+                font-size: 24px; 
+              }
+            </style>
+          </head>
+          <body>
+            <h1>No data available for the selected date range</h1>
+          </body>
+        </html>
+      `;
+    }
+    
+    // Format date for display
+    const formatDisplayDate = (dateStr) => {
+      const date = new Date(dateStr);
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return date.toLocaleDateString(undefined, options);
+    };
+
+    // Calculate totals for the summary
+    const totalAssigned = linesmenData.summaryData.reduce((sum, linesman) => sum + linesman.totalAssigned, 0);
+    const totalInProgress = linesmenData.summaryData.reduce((sum, linesman) => sum + linesman.totalInProgress, 0);
+    const totalCompleted = linesmenData.summaryData.reduce((sum, linesman) => sum + linesman.totalCompleted, 0);
+    const avgCompletionRate = Math.round(
+      linesmenData.summaryData.reduce((sum, linesman) => sum + linesman.completionRate, 0) / 
+      linesmenData.summaryData.length
+    );
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+              padding: 20px; 
+              color: #333;
+              line-height: 1.5;
+            }
+            h1 { 
+              color: #333; 
+              font-size: 28px; 
+              text-align: center; 
+              margin-bottom: 5px;
+            }
+            h2 { 
+              color: #444; 
+              font-size: 22px; 
+              margin-top: 30px; 
+              margin-bottom: 15px;
+              border-bottom: 2px solid #f2f2f2;
+              padding-bottom: 8px;
+            }
+            h3 {
+              color: #555;
+              font-size: 18px;
+              margin-bottom: 12px;
+              font-weight: 600;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 30px; 
+              border-bottom: 2px solid #eaeaea;
+              padding-bottom: 20px;
+            }
+            .logo { 
+              text-align: center; 
+              margin-bottom: 10px; 
+            }
+            .date-range { 
+              font-size: 15px; 
+              color: #666; 
+              text-align: center; 
+              margin-bottom: 5px; 
+            }
+            .generated-date {
+              font-size: 13px;
+              color: #888;
+              text-align: center;
+            }
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              margin: 20px 0;
+              font-size: 14px;
+            }
+            thead { 
+              background-color: #f9f9f9; 
+            }
+            th { 
+              text-align: left; 
+              padding: 12px 10px; 
+              border-bottom: 2px solid #ddd; 
+              font-weight: 600;
+            }
+            td { 
+              padding: 10px; 
+              border-bottom: 1px solid #eee; 
+              vertical-align: middle;
+            }
+            tr:hover {
+              background-color: #f9f9f9;
+            }
+            .summary-box { 
+              background-color: #f9f9f9; 
+              border-radius: 8px; 
+              padding: 20px; 
+              margin-bottom: 30px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            .summary-stats {
+              display: flex;
+              flex-wrap: wrap;
+              justify-content: space-between;
+              margin-top: 15px;
+            }
+            .stat-item {
+              flex: 1 0 20%;
+              margin-bottom: 15px;
+              min-width: 150px;
+              text-align: center;
+            }
+            .stat-number {
+              font-size: 28px;
+              font-weight: 700;
+              margin-bottom: 5px;
+            }
+            .assigned-stat .stat-number {
+              color: #007AFF;
+            }
+            .in-progress-stat .stat-number {
+              color: #FF9500;
+            }
+            .completed-stat .stat-number {
+              color: #34C759;
+            }
+            .completion-rate-stat .stat-number {
+              color: #5856D6;
+            }
+            .stat-label {
+              font-size: 14px;
+              color: #666;
+            }
+            .completion-rate {
+              display: inline-block;
+              padding: 4px 10px;
+              border-radius: 12px;
+              font-size: 12px;
+              font-weight: 500;
+            }
+            .completion-excellent {
+              background-color: #34C759;
+              color: white;
+            }
+            .completion-good {
+              background-color: #5AC8FA;
+              color: white;
+            }
+            .completion-average {
+              background-color: #FF9500;
+              color: white;
+            }
+            .completion-poor {
+              background-color: #FF3B30;
+              color: white;
+            }
+            .daily-table-container {
+              margin-top: 30px;
+            }
+            .daily-date-header {
+              background-color: #edf2f7;
+              padding: 10px;
+              border-radius: 8px;
+              margin-bottom: 10px;
+              font-weight: 600;
+              color: #4a5568;
+            }
+            .footer {
+              margin-top: 40px;
+              text-align: center;
+              font-size: 12px;
+              color: #999;
+              border-top: 1px solid #eee;
+              padding-top: 20px;
+            }
+            .centered {
+              text-align: center;
+            }
+            .text-right {
+              text-align: right;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo">
+              <h1>StreetLight Management System</h1>
+            </div>
+            <h2>Linesmen Assignment Report</h2>
+            <div class="date-range">
+              ${formatDisplayDate(linesmenData.dateRange.startDate)} to ${formatDisplayDate(linesmenData.dateRange.endDate)}
+            </div>
+            <div class="generated-date">
+              Generated on ${new Date().toLocaleString()}
+            </div>
+          </div>
+
+          <div class="summary-box">
+            <h3>Report Overview</h3>
+            <div class="summary-stats">
+              <div class="stat-item assigned-stat">
+                <div class="stat-number">${totalAssigned}</div>
+                <div class="stat-label">Total Tasks Assigned</div>
+              </div>
+              <div class="stat-item in-progress-stat">
+                <div class="stat-number">${totalInProgress}</div>
+                <div class="stat-label">Tasks In Progress</div>
+              </div>
+              <div class="stat-item completed-stat">
+                <div class="stat-number">${totalCompleted}</div>
+                <div class="stat-label">Tasks Completed</div>
+              </div>
+              <div class="stat-item completion-rate-stat">
+                <div class="stat-number">${avgCompletionRate}%</div>
+                <div class="stat-label">Avg. Completion Rate</div>
+              </div>
+            </div>
+          </div>
+
+          <h2>Linesmen Performance Summary</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th class="centered">Assigned</th>
+                <th class="centered">In Progress</th>
+                <th class="centered">Completed</th>
+                <th class="centered">Completion Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${linesmenData.summaryData.map(linesman => {
+                let completionClass = '';
+                if (linesman.completionRate >= 90) completionClass = 'completion-excellent';
+                else if (linesman.completionRate >= 70) completionClass = 'completion-good';
+                else if (linesman.completionRate >= 50) completionClass = 'completion-average';
+                else completionClass = 'completion-poor';
+                
+                return `
+                  <tr>
+                    <td>${linesman.name}</td>
+                    <td>${linesman.phone}</td>
+                    <td class="centered">${linesman.totalAssigned}</td>
+                    <td class="centered">${linesman.totalInProgress}</td>
+                    <td class="centered">${linesman.totalCompleted}</td>
+                    <td class="centered">
+                      <span class="completion-rate ${completionClass}">
+                        ${linesman.completionRate}%
+                      </span>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+
+          <h2>Daily Assignment Breakdown</h2>
+          ${linesmenData.dailyData.map(day => `
+            <div class="daily-table-container">
+              <div class="daily-date-header">
+                ${formatDisplayDate(day.date)}
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Linesman</th>
+                    <th class="centered">Assigned</th>
+                    <th class="centered">In Progress</th>
+                    <th class="centered">Completed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${day.assignments.map(assignment => `
+                    <tr>
+                      <td>${assignment.linesmanName}</td>
+                      <td class="centered">${assignment.assigned}</td>
+                      <td class="centered">${assignment.inProgress}</td>
+                      <td class="centered">${assignment.completed}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `).join('')}
+
+          <div class="footer">
+            <p>This is an automatically generated report from StreetLight Management System</p>
+            <p>© ${new Date().getFullYear()} StreetLight Management</p>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
   // Share HTML as PDF
   const shareHtmlAsPdf = async () => {
     try {
@@ -512,13 +836,34 @@ const Reports = () => {
     try {
       setGenerating(true);
       
-      // For issues summary in PDF format, first fetch latest issues data
+      // For issues summary in PDF format
       if (reportType === 'issues' && reportFormat === 'pdf') {
         // Fetch fresh data from API before generating the report
         await fetchIssues();
         
         // Now generate HTML content with the latest data
         const html = generateIssuesSummaryHTML();
+        setHtmlContent(html);
+        
+        const success = await shareHtmlAsPdf();
+        if (success) {
+          setDownloadUrl('pdf-generated');
+          setShowSuccessModal(true);
+        } else {
+          Alert.alert(
+            'Report Generation Failed',
+            'There was an error generating your PDF. Please try again.',
+            [{ text: 'OK' }]
+          );
+        }
+      }
+      // For linesmen assignments in PDF format
+      else if (reportType === 'assignments' && reportFormat === 'pdf') {
+        // Fetch linesmen assignment data
+        const linesmenData = await fetchLinesmenAssignments(startDate, endDate);
+        
+        // Generate HTML content
+        const html = generateLinesmenAssignmentsHTML(linesmenData);
         setHtmlContent(html);
         
         const success = await shareHtmlAsPdf();
