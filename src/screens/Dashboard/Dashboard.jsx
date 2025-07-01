@@ -99,6 +99,12 @@ const Dashboard = ({ navigation }) => {
       icon: "chart-bar",
       description: "View performance metrics",
     },
+      {
+      label: "Profile",
+      screen: "Profile",
+      icon: "user-circle",
+      description: "Manage JE details and account",
+    },
   ];
 
   // const recentActivity = [
@@ -168,16 +174,28 @@ const Dashboard = ({ navigation }) => {
       
       <Text style={styles.sectionTitle}>Recent Activity</Text>
       <View style={styles.recentActivityContainer}>
-        {recentActivity.map((item, index) => (
-          <View key={index} style={styles.activityItem}>
-            <View style={styles.activityDot} />
-            <View style={styles.activityContent}>
-              <Text style={styles.activityTitle}>{item.title}</Text>
-              <Text style={styles.activityLocation}>{item.location}</Text>
-              <Text style={styles.activityTime}>{item.time}</Text>
+        {recentActivity.length > 0 ? (
+          recentActivity.map((item, index) => (
+            <View key={index} style={styles.activityItem}>
+              <View style={styles.activityTimelineContainer}>
+                <View style={styles.activityDot} />
+                {index < recentActivity.length - 1 && <View style={styles.activityLine} />}
+              </View>
+              <View style={styles.activityCard}>
+                <View style={styles.activityCardHeader}>
+                  <Text style={styles.activityTitle}>{item.title}</Text>
+                  <Text style={styles.activityTime}>{item.time}</Text>
+                </View>
+                <Text style={styles.activityLocation}>{item.location}</Text>
+              </View>
             </View>
+          ))
+        ) : (
+          <View style={styles.emptyActivityContainer}>
+            <FontAwesome5 name="history" size={24} color="#CBD5E1" />
+            <Text style={styles.emptyActivityText}>No recent activity</Text>
           </View>
-        ))}
+        )}
       </View>
       <SignOutButton />
     </ScrollView>
