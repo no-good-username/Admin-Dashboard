@@ -16,7 +16,7 @@ import Reports from '../screens/Reports/Reports';
 import Analytics from '../screens/Analytics/Analytics';
 import NotificationPanel from '../screens/NotificationPanel/NotificationPanel';
 import ReportDetail from '../screens/ReportDetail.js/ReportDetail';
-
+import Profile from '../screens/Profile/Profile';
 // Create stacks for authenticated and non-authenticated flows
 const AuthStack = createNativeStackNavigator();
 const AppStack = createNativeStackNavigator();
@@ -83,6 +83,11 @@ const AppNavigator = () => {
         name="ReportDetail" 
         component={ReportDetail}   
         options={{ title: "Report Details" }} 
+      />
+      <AppStack.Screen
+        name="Profile"
+        component={Profile}
+        options={{ title: "Profile" }}
       />
     </AppStack.Navigator>
   );
