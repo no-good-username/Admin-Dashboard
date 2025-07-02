@@ -50,7 +50,7 @@ const SignUp = ({ navigation }) => {
   const fetchAreasData = async () => {
     try {
       setDataLoading(true);
-      const response = await fetch('http://192.168.0.18:3001/admin/fetchArea');
+      const response = await fetch('https://streetlightfix-backend-2.onrender.com/admin/fetchArea');
       const result = await response.json();
       
       if (result.success) {
@@ -217,7 +217,7 @@ const SignUp = ({ navigation }) => {
       });
       
       // Now that email is verified, register with the backend
-      const backendResponse = await fetch('https://streetlightfix-backend-1.onrender.com/Signup/Engineer', {
+      const backendResponse = await fetch('https://streetlightfix-backend-2.onrender.com/Signup/Engineer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

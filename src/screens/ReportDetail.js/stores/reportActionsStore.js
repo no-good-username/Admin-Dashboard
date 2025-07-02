@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { reportsApi } from '../../../services/api';
+import { reportsApi,updateTaskWithResolution } from '../../../services/api';
 import useLinesmenStore from './linesmenStore';
 import useReportStatusStore from './reportStatusStore';
 import useUpdatesStore from './updatesStore';
@@ -101,7 +101,7 @@ const useReportActionsStore = create((set, get) => ({
     }
   },
   
-  updateStatus: async (reportId, statusLabel, proof = null, onSuccess, onError) => {
+  updateStatus: async (reportId, statusLabel, proof = null, imageUrl = null, onSuccess, onError) => {
     const reportStatusStore = useReportStatusStore.getState();
     const updatesStore = useUpdatesStore.getState();
     const reportsStore = useReportsStore.getState();
@@ -111,8 +111,8 @@ const useReportActionsStore = create((set, get) => ({
     const statusValue = reportStatusStore.getStatusValue(statusLabel);
     
     try {
-      // Update status via API
-      await reportsApi.updateTaskStatus(reportId, statusValue, proof);
+      // Update status via API with proof and image
+      await updateTaskWithResolution(reportId, statusValue, proof, imageUrl);
       
       // Update UI state
       reportStatusStore.setReportStatus(statusLabel);
@@ -128,7 +128,10 @@ const useReportActionsStore = create((set, get) => ({
       // Generate update text
       let updateText = `Report status updated to: ${statusLabel}`;
       if (proof) {
-        updateText += ` with proof: ${proof.substring(0, 50)}${proof.length > 50 ? '...' : ''}`;
+        updateText += ` with resolution details provided`;
+      }
+      if (imageUrl) {
+        updateText += ` and photographic evidence`;
       }
       
       // Clear resolution proof

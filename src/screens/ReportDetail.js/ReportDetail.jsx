@@ -270,11 +270,12 @@ const ReportDetail = React.memo(({ route, navigation }) => {
   ]);
   
   // Wrapper for updateStatus with alerts
-  const handleUpdateStatus = useCallback((statusLabel, proof = null) => {
+  const handleUpdateStatus = useCallback((statusLabel, proof = null, imageUrl = null) => {
     updateStatus(
       report.taskId,
       statusLabel,
       proof,
+      imageUrl,
       // Success callback
       (newStatus) => {
         if (newStatus.toLowerCase() === "resolved" || newStatus.toLowerCase() === "closed") {
@@ -299,7 +300,7 @@ const ReportDetail = React.memo(({ route, navigation }) => {
   }, [report.taskId, updateStatus, showAlert]);
   
   // Handle resolution proof submit
-  const handleResolutionSubmit = useCallback((status, proof) => {
+  const handleResolutionSubmit = useCallback((status, proof, imageUrl = null) => {
     if (!proof.trim()) {
       showAlert({
         type: 'warning',
@@ -310,7 +311,7 @@ const ReportDetail = React.memo(({ route, navigation }) => {
       return;
     }
     
-    handleUpdateStatus(status, proof);
+    handleUpdateStatus(status, proof, imageUrl);
   }, [handleUpdateStatus, showAlert]);
   
   // Prepare sections for SectionList

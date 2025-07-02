@@ -2,6 +2,7 @@ import reportsApi from './reportsApi';
 import linesmenApi from './linesmenApi';
 import dashboardApi from './dashboardApi';
 import authApi from './authApi';
+import updateTaskWithResolution from './updateTaskWithResolution';
 import { apiRequest, BASE_URL } from './config';
 
 // Export individual APIs
@@ -10,6 +11,7 @@ export {
   linesmenApi,
   dashboardApi,
   authApi,
+  updateTaskWithResolution,
   apiRequest,
   BASE_URL
 };
@@ -19,5 +21,6 @@ export default {
   reports: reportsApi,
   linesmen: linesmenApi,
   dashboard: dashboardApi,
-  auth: authApi
+  auth: authApi,
+  updateProof: updateTaskWithResolution,
 };

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://streetlightfix-backend-1.onrender.com';
+const API_BASE_URL = 'https://streetlightfix-backend-2.onrender.com';
 
 // Generic request handler with error handling
 export const apiRequest = async (endpoint, method = 'GET', body = null, customHeaders = {}) => {

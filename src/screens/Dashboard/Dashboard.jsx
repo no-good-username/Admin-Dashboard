@@ -197,7 +197,6 @@ const Dashboard = ({ navigation }) => {
           </View>
         )}
       </View>
-      <SignOutButton />
     </ScrollView>
   );
 };

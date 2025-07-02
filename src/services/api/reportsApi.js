@@ -23,4 +23,17 @@ const reportsApi = {
     apiRequest('/admin/assignTask', 'PATCH', { taskid: taskId, linemanid: linemanIds }),
 };
 
+
+// Add this function to your existing reportsApi.js file
+
+/**
+ * Updates a task status with resolution proof and image
+ * @param {string} taskId - The task ID
+ * @param {string} status - The new status value
+ * @param {string} resolutionProof - Text description of resolution
+ * @param {string|null} imageUrl - URL of the uploaded image (if any)
+ * @returns {Promise<Object>} - API response
+ */
+
+
 export default reportsApi;

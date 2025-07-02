@@ -843,6 +843,65 @@ const styles = StyleSheet.create({
   mapButtonIcon: {
     marginRight: 8,
   },
+
+  // Resolution form styles
+  scrollContent: {
+    flexGrow: 1,
+  },
+  imagePreviewContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 200,
+    marginBottom: 15,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  imagePreview: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderRadius: 15,
+    padding: 5,
+  },
+  imageUploadOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 15,
+  },
+  imageOptionButton: {
+    backgroundColor: '#f0f7ff',
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '45%',
+  },
+  imageOptionText: {
+    marginTop: 8,
+    color: '#007AFF',
+    fontWeight: '500',
+  },
+  changeImageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    marginBottom: 15,
+  },
+  changeImageText: {
+    color: '#007AFF',
+    marginLeft: 5,
+    fontWeight: '500',
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
 });
 
 export default styles;
